@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: #050505;
+  color: #f5f5f0;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  /* ---------- 共通 ---------- */
+  .headline {
+    @apply font-display uppercase italic tracking-tight leading-[0.85];
+  }
+  .label {
+    @apply text-[11px] font-bold uppercase tracking-[0.2em] text-white/40;
+  }
+  .field {
+    @apply w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-base
+           text-chalk outline-none transition
+           placeholder:text-white/25 focus:border-volt focus:bg-white/[0.07];
+  }
+  .btn-volt {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-volt px-8 py-4
+           font-display uppercase italic tracking-wide text-ink transition
+           hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:hover:brightness-100;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/25
+           px-6 py-3 text-sm font-bold uppercase tracking-widest text-chalk transition
+           hover:border-volt hover:text-volt;
+  }
+  .card {
+    @apply rounded-2xl border border-white/10 bg-carbon shadow-card;
+  }
+
+  /* ---------- W杯モード ---------- */
+  .wc-panel {
+    @apply rounded-2xl border border-gold/25 bg-gradient-to-b from-pitch to-pitchdark shadow-card;
+  }
+  .wc-head {
+    @apply text-[10px] font-bold uppercase tracking-[0.18em] text-gold/70;
+  }
+}
+
+/* ピッチのストライプ */
+.pitch-stripes {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.028) 0px,
+    rgba(255, 255, 255, 0.028) 40px,
+    transparent 40px,
+    transparent 80px
+  );
+}
+
+/* ナイキ的な斜めスラッシュ背景 */
+.slash-bg {
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(216, 255, 0, 0.05) 0px,
+    rgba(216, 255, 0, 0.05) 2px,
+    transparent 2px,
+    transparent 22px
+  );
+}
+
+.marquee {
+  animation: marquee 28s linear infinite;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.trophy-glow {
+  text-shadow: 0 0 24px rgba(232, 197, 106, 0.45);
+}
