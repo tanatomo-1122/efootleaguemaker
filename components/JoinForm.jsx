@@ -72,12 +72,12 @@ export default function JoinForm({ leagueId, remaining }) {
     <form onSubmit={submit} className="mt-8 space-y-6">
       <Section n="01" title="出場選手（あなた）">
         <label className="block">
-          <span className="wc-head mb-2 block">efootball ユーザーID</span>
+          <span className="wc-head mb-2 block">efootball ユーザー名</span>
           <input
             className="field"
             value={form.efootball_id}
             onChange={set('efootball_id')}
-            placeholder="登録済みのID"
+            placeholder="登録済みのユーザー名"
             required
           />
           <span className="mt-2 block text-xs text-white/35">

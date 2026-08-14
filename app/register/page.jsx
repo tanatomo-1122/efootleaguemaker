@@ -8,7 +8,7 @@ export default function RegisterPage() {
       <p className="label mb-3">Step 01 / 登録</p>
       <h1 className="headline text-4xl text-chalk">ユーザー登録</h1>
       <p className="mt-4 text-sm text-white/50">
-        入力は2つだけ。ここで登録した efootball ID が、以降すべての申し込みの合言葉になります。
+        ここで登録した efootball ID が、以降すべての申し込みのキーになります。
       </p>
       <RegisterForm />
     </div>

@@ -47,7 +47,7 @@ export default function RegisterForm() {
         <div className="mb-2 flex items-baseline gap-3">
           <span className="headline text-volt">1</span>
           <label htmlFor="eid" className="text-sm font-bold text-chalk">
-            efootball のユーザーID
+            efootball のユーザー名
           </label>
         </div>
         <input
@@ -59,7 +59,7 @@ export default function RegisterForm() {
           autoComplete="off"
           required
         />
-        <p className="mt-2 text-xs text-white/35">ゲーム内で表示されるIDをそのまま入力してください。</p>
+        <p className="mt-2 text-xs text-white/35">ゲーム内で表示されるユーザー名をそのまま入力してください。</p>
       </div>
 
       <div>
