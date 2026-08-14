@@ -1,0 +1,9 @@
+node_modules
+.next
+.env
+.env.local
+exports/
+.DS_Store
+
+# 旧ローカルSQLite（Supabase 移行後は不要）
+data/
