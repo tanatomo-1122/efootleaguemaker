@@ -4,6 +4,7 @@ import { getMatch, getLeague, POOL_LABELS } from '@/lib/league';
 import { STAT_COLUMNS } from '@/lib/schema';
 import ReportForm from '@/components/ReportForm';
 import ApprovePanel from '@/components/ApprovePanel';
+import RoomPanel from '@/components/RoomPanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +42,17 @@ export default async function ReportPage({ params }) {
         <span className="font-display text-2xl italic text-white/25">VS</span>
         <Side name={match.away_team_name} user={match.away_user_name} side="AWAY（承認する側）" align="text-right" />
       </div>
+
+      {/* 対戦部屋: まだ試合が終わっていないときだけ出す */}
+      {!league.cancelled && league.status !== 'finished' && match.status !== 'reported' && (
+        <RoomPanel
+          matchId={matchId}
+          homeUserName={match.home_user_name}
+          awayUserName={match.away_user_name}
+          hasRoom={match.room_code !== null}
+          roomPostedAt={formatTime(match.room_posted_at)}
+        />
+      )}
 
       {league.cancelled ? (
         <p className="mt-12 rounded-xl border border-amber-400/40 bg-amber-400/[0.06] p-6 text-center text-sm text-white/60">

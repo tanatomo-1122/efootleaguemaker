@@ -101,6 +101,11 @@ create table if not exists public.matches (
   approved_at    timestamptz,
   reject_note    text,
 
+  -- ---- 対戦部屋（ホームが立てた部屋の番号。対戦する2人だけが見られる） ----
+  room_code      text,
+  room_note      text,
+  room_posted_at timestamptz,
+
   -- ---- 試合スタッツ（matches.csv の列と一対一） ----
   home_score           double precision, away_score           double precision,
   home_possession      double precision, away_possession      double precision,

@@ -342,7 +342,11 @@ function MatchRow({ m, locked }) {
     >
       <div className="min-w-0 flex-1 text-right">
         <p className="truncate text-sm text-chalk">{m.home_team_name}</p>
-        {pending && <p className="text-[10px] text-amber-300/80">登録済み</p>}
+        {pending ? (
+          <p className="text-[10px] text-amber-300/80">登録済み</p>
+        ) : m.has_room ? (
+          <p className="text-[10px] text-volt">部屋あり</p>
+        ) : null}
       </div>
 
       {reported || pending ? (
