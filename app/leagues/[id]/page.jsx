@@ -5,6 +5,8 @@ import {
 } from '@/lib/league';
 import FinalizeButton from '@/components/FinalizeButton';
 import Bracket from '@/components/Bracket';
+import WithdrawButton from '@/components/WithdrawButton';
+import CancelLeagueButton from '@/components/CancelLeagueButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,8 +42,10 @@ export default async function LeaguePage({ params }) {
           <h1 className="trophy-glow mt-3 font-display text-5xl uppercase italic text-gold sm:text-6xl">
             {league.name}
           </h1>
+          {league.cancelled && <CancelledBanner league={league} />}
+
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-xs">
-            <Badge>{finished ? '確定済み' : '開催中'}</Badge>
+            <Badge>{league.cancelled ? '中止' : finished ? '確定済み' : '開催中'}</Badge>
             <Badge>{league.pool_count} プール × {league.players_per_pool} 人</Badge>
             {league.organizer_user_name && <Badge>主催 {league.organizer_user_name}</Badge>}
             <Badge>承認済み {done} / {matches.length} 試合</Badge>
@@ -83,7 +87,7 @@ export default async function LeaguePage({ params }) {
               key={pool.pool_index}
               label={pool.label}
               matches={matches.filter((m) => m.pool_index === pool.pool_index)}
-              locked={finished}
+              locked={finished || league.cancelled}
             />
           ))}
         </div>
@@ -105,13 +109,28 @@ export default async function LeaguePage({ params }) {
               </div>
               <Link href="/data" className="btn-ghost mt-8">みんなのデータを見る</Link>
             </div>
-          ) : (
-            <FinalizeButton
+          ) : league.cancelled ? (
+            <CancelLeagueButton
               leagueId={leagueId}
-              enabled={finalizable}
-              remaining={matches.length - done}
               organizerUserName={league.organizer_user_name}
+              cancelled
             />
+          ) : (
+            <>
+              <FinalizeButton
+                leagueId={leagueId}
+                enabled={finalizable}
+                remaining={matches.length - done}
+                organizerUserName={league.organizer_user_name}
+              />
+              <div>
+                <CancelLeagueButton
+                  leagueId={leagueId}
+                  organizerUserName={league.organizer_user_name}
+                  cancelled={false}
+                />
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -123,26 +142,53 @@ export default async function LeaguePage({ params }) {
 
 function Preparing({ league, entries, capacity }) {
   const pct = Math.round((entries.length / capacity) * 100);
+  const cancelled = league.cancelled;
+
   return (
     <div className="mx-auto max-w-3xl px-5 py-20 text-center">
-      <p className="label">Preparing</p>
-      <h1 className="headline mt-4 text-5xl text-chalk">{league.name}</h1>
-      <p className="mt-6 text-sm text-white/50">
-        規定人数に達すると自動で締め切られ、組み合わせが抽選されます。
-      </p>
+      <p className="label">{cancelled ? 'Cancelled' : 'Preparing'}</p>
+      <h1 className={`headline mt-4 text-5xl ${cancelled ? 'text-white/40' : 'text-chalk'}`}>
+        {league.name}
+      </h1>
 
-      <div className="headline mt-12 text-8xl text-volt">
+      {cancelled ? (
+        <CancelledBanner league={league} />
+      ) : (
+        <p className="mt-6 text-sm text-white/50">
+          規定人数に達すると自動で締め切られ、組み合わせが抽選されます。
+        </p>
+      )}
+
+      <div className={`headline mt-12 text-8xl ${cancelled ? 'text-white/20' : 'text-volt'}`}>
         {entries.length}
         <span className="text-4xl text-white/20">/{capacity}</span>
       </div>
       <div className="mx-auto mt-6 h-2 w-full max-w-lg overflow-hidden rounded-full bg-white/10">
-        <div className="h-full bg-volt transition-all" style={{ width: `${pct}%` }} />
+        <div
+          className={`h-full transition-all ${cancelled ? 'bg-white/20' : 'bg-volt'}`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
-      <p className="mt-4 text-xs text-white/40">あと {capacity - entries.length} 人</p>
+      {!cancelled && (
+        <p className="mt-4 text-xs text-white/40">あと {capacity - entries.length} 人</p>
+      )}
 
-      <Link href={`/leagues/${league.league_id}/join`} className="btn-volt mt-10">
-        エントリーする
-      </Link>
+      {!cancelled && (
+        <div>
+          <Link href={`/leagues/${league.league_id}/join`} className="btn-volt mt-10">
+            エントリーする
+          </Link>
+        </div>
+      )}
+
+      <div className="flex flex-col items-center">
+        {!cancelled && <WithdrawButton leagueId={league.league_id} />}
+        <CancelLeagueButton
+          leagueId={league.league_id}
+          organizerUserName={league.organizer_user_name}
+          cancelled={cancelled}
+        />
+      </div>
 
       {entries.length > 0 && (
         <ul className="mx-auto mt-14 grid max-w-xl gap-2 text-left">
@@ -161,6 +207,20 @@ function Preparing({ league, entries, capacity }) {
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function CancelledBanner({ league }) {
+  return (
+    <div className="mx-auto mt-6 max-w-lg rounded-xl border border-amber-400/40 bg-amber-400/[0.06] p-5 text-sm">
+      <p className="font-bold text-amber-300">このリーグは中止されました</p>
+      {league.cancel_reason && (
+        <p className="mt-2 text-white/60">理由: {league.cancel_reason}</p>
+      )}
+      <p className="mt-2 text-xs text-white/40">
+        募集一覧には表示されません。申し込みや結果の登録もできません。
+      </p>
     </div>
   );
 }

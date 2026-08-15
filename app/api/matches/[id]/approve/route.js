@@ -19,6 +19,9 @@ export async function POST(req, { params }) {
     if (!match) return NextResponse.json({ error: '試合が見つかりません' }, { status: 404 });
 
     const league = await getLeague(match.league_id);
+    if (league.cancelled) {
+      return NextResponse.json({ error: 'このリーグは中止されています' }, { status: 400 });
+    }
     if (league.status === 'finished') {
       return NextResponse.json({ error: 'このリーグは確定済みです' }, { status: 400 });
     }

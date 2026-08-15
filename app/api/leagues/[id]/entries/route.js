@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { saveUpload } from '@/lib/storage';
-import { getLeague, tryCloseAndDraw, listEntries } from '@/lib/league';
+import { getLeague, tryCloseAndDraw, listEntries, withdrawEntry } from '@/lib/league';
 import { authenticate, AuthError } from '@/lib/auth';
 
 export const runtime = 'nodejs';
@@ -17,6 +17,9 @@ export async function POST(req, { params }) {
     const leagueId = Number(params.id);
     const league = await getLeague(leagueId);
     if (!league) return NextResponse.json({ error: 'リーグが存在しません' }, { status: 404 });
+    if (league.cancelled) {
+      return NextResponse.json({ error: 'このリーグは中止されています' }, { status: 400 });
+    }
     if (league.status !== 'recruiting') {
       return NextResponse.json({ error: 'このリーグは既に締め切られています' }, { status: 400 });
     }
@@ -95,5 +98,38 @@ export async function POST(req, { params }) {
       return NextResponse.json({ error: e.message }, { status: e.status });
     }
     return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
+/**
+ * 参加取り消し。組み合わせ抽選の前（募集中）だけ、本人のユーザーIDで実行できる。
+ * body: { efootball_user_id }
+ */
+export async function DELETE(req, { params }) {
+  try {
+    const leagueId = Number(params.id);
+    const league = await getLeague(leagueId);
+    if (!league) return NextResponse.json({ error: 'リーグが存在しません' }, { status: 404 });
+
+    if (league.status !== 'recruiting') {
+      return NextResponse.json(
+        {
+          error:
+            '組み合わせが確定した後は取り消せません。主催者に相談してください',
+        },
+        { status: 400 }
+      );
+    }
+
+    const body = await req.json().catch(() => ({}));
+    const user = await authenticate(body.efootball_user_id);
+    const removed = await withdrawEntry(leagueId, user.user_id);
+
+    return NextResponse.json({ ok: true, team_name: removed.team_name });
+  } catch (e) {
+    if (e instanceof AuthError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
+    return NextResponse.json({ error: e.message }, { status: 400 });
   }
 }

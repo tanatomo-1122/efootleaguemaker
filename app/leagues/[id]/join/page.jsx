@@ -14,6 +14,18 @@ export default async function JoinPage({ params }) {
   const capacity = league.players_per_pool * league.pool_count;
   const remaining = capacity - entries.length;
 
+  if (league.cancelled) {
+    return (
+      <div className="mx-auto max-w-xl px-5 py-24 text-center">
+        <h1 className="headline text-4xl text-chalk">このリーグは中止されました</h1>
+        {league.cancel_reason && (
+          <p className="mt-4 text-sm text-white/50">理由: {league.cancel_reason}</p>
+        )}
+        <Link href="/leagues" className="btn-volt mt-8">他のリーグを探す</Link>
+      </div>
+    );
+  }
+
   if (league.status !== 'recruiting') {
     return (
       <div className="mx-auto max-w-xl px-5 py-24 text-center">

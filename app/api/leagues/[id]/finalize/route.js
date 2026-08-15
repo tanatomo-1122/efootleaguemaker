@@ -12,6 +12,13 @@ export async function POST(req, { params }) {
     const league = await getLeague(leagueId);
     if (!league) return NextResponse.json({ error: 'リーグが存在しません' }, { status: 404 });
 
+    if (league.cancelled) {
+      return NextResponse.json(
+        { error: 'このリーグは中止されています。確定するには先に再開してください' },
+        { status: 400 }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
 
     await authenticateAs(

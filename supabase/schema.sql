@@ -25,8 +25,10 @@ alter table public.users add constraint users_efootball_user_id_format
 
 -- ---------------------------------------------------------------
 -- leagues
---   organizer_user_id: 主催者。リーグの確定はこのユーザーだけが行える
---   status: recruiting（募集中） / in_progress（開催中） / finished（確定済み）
+--   organizer_user_id: 主催者。リーグの確定・中止はこのユーザーだけが行える
+--   status:       recruiting（募集中） / in_progress（開催中） / finished（確定済み）
+--   cancelled_at: 中止した日時。NULL でなければ「中止中」。
+--                 status は元のまま残すので、再開するとその状態に戻る
 -- ---------------------------------------------------------------
 create table if not exists public.leagues (
   league_id         int generated always as identity primary key,
@@ -38,8 +40,12 @@ create table if not exists public.leagues (
   recruit_end       text,
   description       text,
   status            text not null default 'recruiting',
+  cancelled_at      timestamptz,
+  cancel_reason     text,
   created_at        timestamptz not null default now()
 );
+
+create index if not exists idx_leagues_active on public.leagues (cancelled_at, status);
 
 -- ---------------------------------------------------------------
 -- squads

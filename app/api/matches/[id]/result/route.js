@@ -15,6 +15,15 @@ export async function POST(req, { params }) {
     const match = await getMatch(matchId);
     if (!match) return NextResponse.json({ error: '試合が見つかりません' }, { status: 404 });
 
+    // リーグ側の都合は、誰が来ても同じ結果になるので先に見る
+    const league = await getLeague(match.league_id);
+    if (league.cancelled) {
+      return NextResponse.json({ error: 'このリーグは中止されています' }, { status: 400 });
+    }
+    if (league.status === 'finished') {
+      return NextResponse.json({ error: 'このリーグは確定済みです' }, { status: 400 });
+    }
+
     // --- 本人確認: 結果を登録できるのはホーム側のみ ---
     await authenticateAs(
       body.efootball_user_id,
@@ -26,11 +35,6 @@ export async function POST(req, { params }) {
     if (stats.home_score === '' || stats.home_score == null ||
         stats.away_score === '' || stats.away_score == null) {
       return NextResponse.json({ error: '得点(スコア)は必須です' }, { status: 400 });
-    }
-
-    const league = await getLeague(match.league_id);
-    if (league.status === 'finished') {
-      return NextResponse.json({ error: 'このリーグは確定済みです' }, { status: 400 });
     }
 
     await saveMatchResult(matchId, stats, {

@@ -125,6 +125,14 @@ await sql`
           '週末だけで一気に消化する短期リーグ。')
 `;
 
+// --- 中止済みのリーグも1つ用意（募集一覧に出ないことの確認用） ---
+await sql`
+  INSERT INTO leagues
+    (name, organizer_user_id, players_per_pool, pool_count, description, cancelled_at, cancel_reason)
+  VALUES ('幻の深夜リーグ', ${organizer.user_id}, 4, 1,
+          '深夜帯にやる予定だったリーグ。', now(), '人数が集まらなかったため')
+`;
+
 console.log(`主催者: ${organizer.user_name}（ユーザーID ${organizer.efootball_user_id}）`);
 console.log('\nサンプルユーザーのユーザーID（動作確認用の合言葉）:');
 for (const [userName, userId] of PLAYERS) console.log(`  ${userName.padEnd(12)} ${userId}`);

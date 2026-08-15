@@ -42,7 +42,12 @@ export default async function ReportPage({ params }) {
         <Side name={match.away_team_name} user={match.away_user_name} side="AWAY（承認する側）" align="text-right" />
       </div>
 
-      {league.status === 'finished' ? (
+      {league.cancelled ? (
+        <p className="mt-12 rounded-xl border border-amber-400/40 bg-amber-400/[0.06] p-6 text-center text-sm text-white/60">
+          このリーグは中止されているため、結果の登録・承認はできません。
+          {league.cancel_reason ? `（理由: ${league.cancel_reason}）` : ''}
+        </p>
+      ) : league.status === 'finished' ? (
         <p className="mt-12 rounded-xl border border-white/10 bg-white/[0.03] p-6 text-center text-sm text-white/50">
           このリーグは確定済みのため、結果の変更はできません。
         </p>
