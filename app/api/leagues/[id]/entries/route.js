@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { saveUpload } from '@/lib/storage';
 import { getLeague, tryCloseAndDraw, listEntries } from '@/lib/league';
+import { authenticate, AuthError } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -21,14 +22,12 @@ export async function POST(req, { params }) {
     }
 
     const form = await req.formData();
-    const efootballId = String(form.get('efootball_id') || '').trim();
     const teamName = String(form.get('team_name') || '').trim();
     const attackFormation = String(form.get('attack_formation') || '').trim();
     const defenceFormation = String(form.get('defence_formation') || '').trim();
     const teamStyle = String(form.get('team_style') || '').trim();
     const teamPower = Number(form.get('team_power'));
 
-    if (!efootballId) return NextResponse.json({ error: 'efootball ID を入力してください' }, { status: 400 });
     if (!teamName) return NextResponse.json({ error: 'スカッド名を入力してください' }, { status: 400 });
     if (!attackFormation) {
       return NextResponse.json({ error: '攻撃時フォーメーションを選択してください' }, { status: 400 });
@@ -41,13 +40,8 @@ export async function POST(req, { params }) {
       return NextResponse.json({ error: 'チームパワーを入力してください' }, { status: 400 });
     }
 
-    const [user] = await sql`SELECT * FROM users WHERE efootball_id = ${efootballId}`;
-    if (!user) {
-      return NextResponse.json(
-        { error: 'ユーザー登録が見つかりません。先にユーザー登録を行ってください' },
-        { status: 400 }
-      );
-    }
+    // 申し込むのが本人であることをユーザーIDで確認する
+    const user = await authenticate(form.get('efootball_user_id'));
 
     const [dup] = await sql`
       SELECT 1 FROM entries WHERE league_id = ${leagueId} AND user_id = ${user.user_id}
@@ -95,8 +89,11 @@ export async function POST(req, { params }) {
     // 規定人数に達したら自動締切 → 組み合わせ抽選
     const drawn = await tryCloseAndDraw(leagueId);
 
-    return NextResponse.json({ ok: true, drawn, league_id: leagueId });
+    return NextResponse.json({ ok: true, drawn, league_id: leagueId, user_name: user.user_name });
   } catch (e) {
+    if (e instanceof AuthError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

@@ -1,17 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PhotoInput from './PhotoInput';
+import UserIdInput, { rememberUserId } from './UserIdInput';
 import { STAT_KEYS } from '@/lib/schema';
 
 /** ホーム側が結果を登録するフォーム（登録後はアウェイの承認待ちになる） */
 export default function ReportForm({
-  matchId, leagueId, homeName, awayName, homeEfootballId, awayEfootballId,
+  matchId, leagueId, homeName, awayName, homeUserName, awayUserName,
   initialStats, hasResult, existingImage,
 }) {
   const router = useRouter();
-  const [efootballId, setEfootballId] = useState('');
+  const [userId, setUserId] = useState('');
   const [file, setFile] = useState(null);
   const [stats, setStats] = useState(initialStats);
   const [imagePath, setImagePath] = useState(existingImage || null);
@@ -21,14 +22,6 @@ export default function ReportForm({
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('efootball_id');
-      if (saved) setEfootballId(saved);
-    } catch {}
-  }, []);
-
-  const isHome = efootballId.trim().toLowerCase() === String(homeEfootballId).toLowerCase();
   const setStat = (col) => (e) => setStats((s) => ({ ...s, [col]: e.target.value }));
 
   async function analyze() {
@@ -76,7 +69,7 @@ export default function ReportForm({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          efootball_id: efootballId,
+          efootball_user_id: userId,
           stats,
           image_path: imagePath,
           source: analysis?.matched ? 'auto' : 'manual',
@@ -84,7 +77,7 @@ export default function ReportForm({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '保存に失敗しました');
-      try { localStorage.setItem('efootball_id', efootballId); } catch {}
+      rememberUserId(userId);
       setSent(true);
       setTimeout(() => {
         router.push(`/leagues/${leagueId}`);
@@ -101,7 +94,7 @@ export default function ReportForm({
       <div className="card mt-10 p-10 text-center">
         <p className="headline text-3xl text-volt">送信しました</p>
         <p className="mt-4 text-sm text-white/60">
-          アウェイの <span className="text-chalk">{awayEfootballId}</span> さんが承認すると、
+          アウェイの <span className="text-chalk">{awayUserName}</span> さんが承認すると、
           リーグ表に反映されます。
         </p>
       </div>
@@ -112,22 +105,13 @@ export default function ReportForm({
     <div className="mt-10 space-y-8">
       {/* ---------- 本人確認 ---------- */}
       <section className="card p-6">
-        <p className="label mb-4">Step 1 / あなたは誰？</p>
-        <input
-          className="field"
-          value={efootballId}
-          onChange={(e) => setEfootballId(e.target.value)}
-          placeholder="あなたの efootball ID"
+        <p className="label mb-4">Step 1 / 本人確認</p>
+        <UserIdInput
+          value={userId}
+          onChange={setUserId}
+          label="あなたのユーザーID"
+          hint={`結果を登録できるのはホーム側の ${homeUserName} さんです。`}
         />
-        <p className="mt-3 text-xs text-white/40">
-          結果を登録できるのはホーム側の{' '}
-          <span className="text-chalk">{homeEfootballId}</span> さんです。
-          {efootballId && !isHome && (
-            <span className="mt-1 block text-amber-300">
-              入力されたIDはホーム側ではありません。アウェイの方は、ホームの登録後に承認をお願いします。
-            </span>
-          )}
-        </p>
       </section>
 
       {/* ---------- 画像アップロード ---------- */}
@@ -231,11 +215,11 @@ export default function ReportForm({
             </div>
           )}
 
-          <button onClick={save} disabled={busy || !efootballId} className="btn-volt mt-7 w-full">
+          <button onClick={save} disabled={busy || !userId} className="btn-volt mt-7 w-full">
             {busy ? '送信中…' : 'この内容でアウェイに承認を依頼する'}
           </button>
           <p className="mt-3 text-center text-xs text-white/35">
-            アウェイの {awayEfootballId} さんが承認するとリーグ表と matches.csv に反映されます。
+            アウェイの {awayUserName} さんが承認するとリーグ表と集計に反映されます。
           </p>
         </section>
       )}

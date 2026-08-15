@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { listLeagues } from '@/lib/league';
+import { authenticate, AuthError } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,14 +14,10 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const name = String(body.name || '').trim();
-    const organizerId = String(body.organizer_efootball_id || '').trim();
     const playersPerPool = Number(body.players_per_pool);
     const poolCount = Number(body.pool_count);
 
     if (!name) return NextResponse.json({ error: 'リーグ名を入力してください' }, { status: 400 });
-    if (!organizerId) {
-      return NextResponse.json({ error: '主催者の efootball ID を入力してください' }, { status: 400 });
-    }
     if (!(playersPerPool >= 2 && playersPerPool <= 16)) {
       return NextResponse.json({ error: '1リーグの人数は2〜16人で指定してください' }, { status: 400 });
     }
@@ -28,13 +25,8 @@ export async function POST(req) {
       return NextResponse.json({ error: 'プール数は1〜8で指定してください' }, { status: 400 });
     }
 
-    const [organizer] = await sql`SELECT * FROM users WHERE efootball_id = ${organizerId}`;
-    if (!organizer) {
-      return NextResponse.json(
-        { error: '主催者のユーザー登録が見つかりません。先にユーザー登録を行ってください' },
-        { status: 400 }
-      );
-    }
+    // 主催者はユーザーIDで本人確認する
+    const organizer = await authenticate(body.efootball_user_id);
 
     const [league] = await sql`
       INSERT INTO leagues
@@ -44,10 +36,13 @@ export async function POST(req) {
         ${body.recruit_start || null}, ${body.recruit_end || null},
         ${String(body.description || '').trim() || null}
       )
-      RETURNING *
+      RETURNING league_id, name, status
     `;
-    return NextResponse.json({ league });
+    return NextResponse.json({ league, organizer_user_name: organizer.user_name });
   } catch (e) {
+    if (e instanceof AuthError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

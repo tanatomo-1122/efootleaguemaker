@@ -6,14 +6,22 @@
 
 -- ---------------------------------------------------------------
 -- users
+--   user_name         : eFootball のユーザー名。公開表示に使う（一意）
+--   efootball_user_id : eFootball のユーザーID（ASLV-569-790-534 形式）。
+--                       本人確認の合言葉として使うため、画面には一切表示しない（一意）
 -- ---------------------------------------------------------------
 create table if not exists public.users (
-  user_id       int generated always as identity primary key,
-  efootball_id  text        not null unique,
-  display_name  text,
-  photo_path    text,
-  created_at    timestamptz not null default now()
+  user_id           int generated always as identity primary key,
+  user_name         text        not null unique,
+  efootball_user_id text        not null unique,
+  photo_path        text,
+  created_at        timestamptz not null default now()
 );
+
+-- 形式チェック（大文字4文字 + 3桁×3）
+alter table public.users drop constraint if exists users_efootball_user_id_format;
+alter table public.users add constraint users_efootball_user_id_format
+  check (efootball_user_id ~ '^[A-Z]{4}-[0-9]{3}-[0-9]{3}-[0-9]{3}$');
 
 -- ---------------------------------------------------------------
 -- leagues

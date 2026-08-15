@@ -79,8 +79,8 @@ function Slot({ seed }) {
         <p className={`truncate text-sm ${seed.team_name ? 'text-chalk' : 'text-white/30'}`}>
           {seed.team_name ?? '未確定'}
         </p>
-        {seed.efootball_id && (
-          <p className="truncate text-[10px] text-white/35">{seed.efootball_id}</p>
+        {seed.user_name && (
+          <p className="truncate text-[10px] text-white/35">{seed.user_name}</p>
         )}
       </div>
       <span

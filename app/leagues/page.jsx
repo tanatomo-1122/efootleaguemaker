@@ -65,9 +65,9 @@ async function LeagueCard({ league }) {
             {st.text}
           </span>
           <h2 className="headline mt-4 truncate text-3xl text-chalk">{league.name}</h2>
-          {league.organizer_efootball_id && (
+          {league.organizer_user_name && (
             <p className="mt-1 truncate text-xs text-white/35">
-              主催: {league.organizer_efootball_id}
+              主催: {league.organizer_user_name}
             </p>
           )}
           {league.description && (
@@ -114,17 +114,17 @@ async function LeagueCard({ league }) {
               <img
                 key={e.entry_id}
                 src={e.user_photo}
-                alt={e.efootball_id}
-                title={e.efootball_id}
+                alt={e.user_name}
+                title={e.user_name}
                 className="h-8 w-8 rounded-full border-2 border-carbon object-cover"
               />
             ) : (
               <span
                 key={e.entry_id}
-                title={e.efootball_id}
+                title={e.user_name}
                 className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-carbon bg-steel text-[10px] font-bold text-white/60"
               >
-                {String(e.efootball_id).slice(0, 2).toUpperCase()}
+                {String(e.user_name).slice(0, 2).toUpperCase()}
               </span>
             )
           )}

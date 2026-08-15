@@ -21,8 +21,8 @@ export default async function ReportPage({ params }) {
     leagueId: match.league_id,
     homeName: match.home_team_name,
     awayName: match.away_team_name,
-    homeEfootballId: match.home_efootball_id,
-    awayEfootballId: match.away_efootball_id,
+    homeUserName: match.home_user_name,
+    awayUserName: match.away_user_name,
   };
 
   return (
@@ -37,9 +37,9 @@ export default async function ReportPage({ params }) {
       </p>
 
       <div className="mt-4 flex items-center justify-between gap-4">
-        <Side name={match.home_team_name} user={match.home_efootball_id} side="HOME（結果を登録する側）" align="text-left" />
+        <Side name={match.home_team_name} user={match.home_user_name} side="HOME（結果を登録する側）" align="text-left" />
         <span className="font-display text-2xl italic text-white/25">VS</span>
-        <Side name={match.away_team_name} user={match.away_efootball_id} side="AWAY（承認する側）" align="text-right" />
+        <Side name={match.away_team_name} user={match.away_user_name} side="AWAY（承認する側）" align="text-right" />
       </div>
 
       {league.status === 'finished' ? (
@@ -66,7 +66,7 @@ export default async function ReportPage({ params }) {
               {match.home_score} <span className="text-white/25">-</span> {match.away_score}
             </p>
             <p className="mt-4 text-sm text-white/50">
-              アウェイの {match.away_efootball_id} さんが承認済みです。リーグ表に反映されています。
+              アウェイの {match.away_user_name} さんが承認済みです。リーグ表に反映されています。
             </p>
             <Link href={`/leagues/${match.league_id}`} className="btn-ghost mt-8">リーグ表を見る</Link>
           </div>

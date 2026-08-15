@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PhotoInput from './PhotoInput';
+import UserIdInput, { rememberUserId } from './UserIdInput';
 import { FORMATIONS, TEAM_STYLES } from '@/lib/schema';
 
 export default function JoinForm({ leagueId, remaining }) {
   const router = useRouter();
+  const [userId, setUserId] = useState('');
   const [form, setForm] = useState({
-    efootball_id: '',
     team_name: '',
     attack_formation: '4-3-3',
     defence_formation: '4-4-2',
@@ -20,13 +21,6 @@ export default function JoinForm({ leagueId, remaining }) {
   const [error, setError] = useState(null);
   const [drawn, setDrawn] = useState(false);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('efootball_id');
-      if (saved) setForm((f) => ({ ...f, efootball_id: saved }));
-    } catch {}
-  }, []);
-
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   async function submit(e) {
@@ -36,13 +30,14 @@ export default function JoinForm({ leagueId, remaining }) {
     try {
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+      fd.append('efootball_user_id', userId);
       if (photo) fd.append('squad_photo', photo);
 
       const res = await fetch(`/api/leagues/${leagueId}/entries`, { method: 'POST', body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '申し込みに失敗しました');
 
-      try { localStorage.setItem('efootball_id', form.efootball_id); } catch {}
+      rememberUserId(userId);
 
       if (data.drawn) {
         setDrawn(true);
@@ -71,20 +66,17 @@ export default function JoinForm({ leagueId, remaining }) {
   return (
     <form onSubmit={submit} className="mt-8 space-y-6">
       <Section n="01" title="出場選手（あなた）">
-        <label className="block">
-          <span className="wc-head mb-2 block">efootball ユーザー名</span>
-          <input
-            className="field"
-            value={form.efootball_id}
-            onChange={set('efootball_id')}
-            placeholder="登録済みのユーザー名"
-            required
-          />
-          <span className="mt-2 block text-xs text-white/35">
-            未登録の方は先に{' '}
-            <a href="/register" className="text-volt underline">ユーザー登録</a> をどうぞ。
-          </span>
-        </label>
+        <UserIdInput
+          value={userId}
+          onChange={setUserId}
+          label="あなたのユーザーID"
+          required
+          hint="登録済みのユーザーIDで本人確認します。リーグ表には表示されません。"
+        />
+        <p className="mt-2 text-xs text-white/35">
+          未登録の方は先に{' '}
+          <a href="/register" className="text-volt underline">ユーザー登録</a> をどうぞ。
+        </p>
       </Section>
 
       <Section n="02" title="スカッド情報">

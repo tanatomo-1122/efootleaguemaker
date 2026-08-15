@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import UserIdInput, { rememberUserId } from './UserIdInput';
 
 export default function CreateLeagueForm() {
   const router = useRouter();
+  const [userId, setUserId] = useState('');
   const [form, setForm] = useState({
     name: '',
-    organizer_efootball_id: '',
     players_per_pool: 4,
     pool_count: 1,
     recruit_start: '',
@@ -16,13 +17,6 @@ export default function CreateLeagueForm() {
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('efootball_id');
-      if (saved) setForm((f) => ({ ...f, organizer_efootball_id: saved }));
-    } catch {}
-  }, []);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -40,13 +34,14 @@ export default function CreateLeagueForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
+          efootball_user_id: userId,
           players_per_pool: Number(form.players_per_pool),
           pool_count: Number(form.pool_count),
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '作成に失敗しました');
-      try { localStorage.setItem('efootball_id', form.organizer_efootball_id); } catch {}
+      rememberUserId(userId);
       router.push(`/leagues/${data.league.league_id}`);
     } catch (err) {
       setError(err.message);
@@ -60,19 +55,19 @@ export default function CreateLeagueForm() {
         <input className="field" value={form.name} onChange={set('name')} placeholder="例: 第1回 efootleague 杯" required />
       </Field>
 
-      <Field label="主催者の efootball ID">
-        <input
-          className="field"
-          value={form.organizer_efootball_id}
-          onChange={set('organizer_efootball_id')}
-          placeholder="登録済みのあなたのID"
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+        <UserIdInput
+          value={userId}
+          onChange={setUserId}
+          label="主催者（あなた）のユーザーID"
           required
+          hint="このIDのユーザーが主催者になります。リーグの結果を確定できるのは主催者だけです。"
         />
-        <span className="mt-2 block text-xs text-white/35">
-          リーグの結果を確定できるのは、ここで指定した主催者だけになります。
-          未登録の場合は先に <a href="/register" className="text-volt underline">ユーザー登録</a> をどうぞ。
-        </span>
-      </Field>
+        <p className="mt-2 text-xs text-white/35">
+          未登録の場合は先に{' '}
+          <a href="/register" className="text-volt underline">ユーザー登録</a> をどうぞ。
+        </p>
+      </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="1リーグ(プール)の人数">

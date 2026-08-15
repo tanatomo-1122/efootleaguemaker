@@ -15,29 +15,32 @@ if (process.argv.includes('--reset')) {
   console.log('既存データを削除しました');
 }
 
+// [ユーザー名, ユーザーID(本人確認用), スカッド名]
+// ユーザーIDは本来 eFootball のマイページに表示されているものを本人が入力します。
+// ここではサンプル用のダミーです。
 const PLAYERS = [
-  ['TOMOYA_10', 'ともや', 'TOMOYA FC'],
-  ['KENTA_SS', 'けんた', 'Blue Lions'],
-  ['YUKI_007', 'ゆうき', 'Osaka United'],
-  ['SHOTA_ACE', 'しょうた', 'Nagoya Wolves'],
-  ['REN_9', 'れん', 'Sapporo Frost'],
-  ['DAIKI_R', 'だいき', 'Kobe Marina'],
-  ['HARUTO_88', 'はると', 'Fukuoka Falcons'],
-  ['SORA_11', 'そら', 'Sendai Thunder'],
+  ['TOMOYA_10', 'KZLP-482-119-673', 'TOMOYA FC'],
+  ['KENTA_SS', 'BQMW-118-224-903', 'Blue Lions'],
+  ['YUKI_007', 'CRNX-337-651-208', 'Osaka United'],
+  ['SHOTA_ACE', 'DSOY-472-019-745', 'Nagoya Wolves'],
+  ['REN_9', 'ETPZ-860-533-127', 'Sapporo Frost'],
+  ['DAIKI_R', 'FUQA-205-948-360', 'Kobe Marina'],
+  ['HARUTO_88', 'GVRB-714-286-591', 'Fukuoka Falcons'],
+  ['SORA_11', 'HWSC-093-467-812', 'Sendai Thunder'],
 ];
 
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 // --- ユーザー登録 ---
-for (const [id, name] of PLAYERS) {
+for (const [userName, userId] of PLAYERS) {
   await sql`
-    INSERT INTO users (efootball_id, display_name) VALUES (${id}, ${name})
-    ON CONFLICT (efootball_id) DO NOTHING
+    INSERT INTO users (user_name, efootball_user_id) VALUES (${userName}, ${userId})
+    ON CONFLICT (user_name) DO NOTHING
   `;
 }
 
-const [organizer] = await sql`SELECT * FROM users WHERE efootball_id = 'TOMOYA_10'`;
+const [organizer] = await sql`SELECT * FROM users WHERE user_name = 'TOMOYA_10'`;
 
 // --- リーグ作成: 2プール × 4人 ---
 const [league] = await sql`
@@ -49,8 +52,8 @@ const [league] = await sql`
 const leagueId = league.league_id;
 
 // --- 参加申込 + スカッド登録 ---
-for (const [eid, , teamName] of PLAYERS) {
-  const [user] = await sql`SELECT * FROM users WHERE efootball_id = ${eid}`;
+for (const [userName, , teamName] of PLAYERS) {
+  const [user] = await sql`SELECT * FROM users WHERE user_name = ${userName}`;
   const [squad] = await sql`
     INSERT INTO squads
       (user_id, team_name, attack_formation, defence_formation, team_style, team_power)
@@ -122,7 +125,9 @@ await sql`
           '週末だけで一気に消化する短期リーグ。')
 `;
 
-console.log(`主催者: ${organizer.efootball_id}（この ID でのみリーグを確定できます）`);
-console.log('完了しました。npm run dev で起動してください。');
+console.log(`主催者: ${organizer.user_name}（ユーザーID ${organizer.efootball_user_id}）`);
+console.log('\nサンプルユーザーのユーザーID（動作確認用の合言葉）:');
+for (const [userName, userId] of PLAYERS) console.log(`  ${userName.padEnd(12)} ${userId}`);
+console.log('\n完了しました。npm run dev で起動してください。');
 
 await sql.end();

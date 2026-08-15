@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
-import { finalizeLeague, getLeague, isOrganizer } from '@/lib/league';
+import { finalizeLeague, getLeague } from '@/lib/league';
+import { authenticateAs, AuthError } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/** リーグの確定。主催者だけが実行できる */
+/** リーグの確定。主催者だけが実行できる（ユーザーIDで本人確認） */
 export async function POST(req, { params }) {
   try {
     const leagueId = Number(params.id);
@@ -12,21 +13,19 @@ export async function POST(req, { params }) {
     if (!league) return NextResponse.json({ error: 'リーグが存在しません' }, { status: 404 });
 
     const body = await req.json().catch(() => ({}));
-    const efootballId = String(body.efootball_id || '').trim();
 
-    if (!efootballId) {
-      return NextResponse.json({ error: '主催者の efootball ID を入力してください' }, { status: 400 });
-    }
-    if (!(await isOrganizer(leagueId, efootballId))) {
-      return NextResponse.json(
-        { error: `結果を確定できるのは主催者（${league.organizer_efootball_id ?? '未設定'}）だけです` },
-        { status: 403 }
-      );
-    }
+    await authenticateAs(
+      body.efootball_user_id,
+      league.organizer_user_id,
+      `結果を確定できるのは主催者（${league.organizer_user_name ?? '未設定'}）だけです`
+    );
 
     await finalizeLeague(leagueId);
     return NextResponse.json({ ok: true });
   } catch (e) {
+    if (e instanceof AuthError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
     return NextResponse.json({ error: e.message }, { status: 400 });
   }
 }

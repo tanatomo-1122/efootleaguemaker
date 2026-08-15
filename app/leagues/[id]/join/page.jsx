@@ -63,7 +63,7 @@ export default async function JoinPage({ params }) {
                   <div className="min-w-0">
                     <p className="truncate text-sm font-bold text-chalk">{e.team_name}</p>
                     <p className="truncate text-xs text-white/40">
-                      {e.efootball_id} ・ ⚔{e.attack_formation} 🛡{e.defence_formation}
+                      {e.user_name} ・ ⚔{e.attack_formation} 🛡{e.defence_formation}
                     </p>
                   </div>
                   <span className="font-mono text-xs text-gold">{e.team_power}</span>

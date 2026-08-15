@@ -43,7 +43,7 @@ export default async function LeaguePage({ params }) {
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-xs">
             <Badge>{finished ? '確定済み' : '開催中'}</Badge>
             <Badge>{league.pool_count} プール × {league.players_per_pool} 人</Badge>
-            {league.organizer_efootball_id && <Badge>主催 {league.organizer_efootball_id}</Badge>}
+            {league.organizer_user_name && <Badge>主催 {league.organizer_user_name}</Badge>}
             <Badge>承認済み {done} / {matches.length} 試合</Badge>
             {pending > 0 && (
               <span className="rounded-full bg-amber-400 px-4 py-1.5 text-[11px] font-black tracking-widest text-ink">
@@ -110,7 +110,7 @@ export default async function LeaguePage({ params }) {
               leagueId={leagueId}
               enabled={finalizable}
               remaining={matches.length - done}
-              organizerEfootballId={league.organizer_efootball_id}
+              organizerUserName={league.organizer_user_name}
             />
           )}
         </div>
@@ -149,11 +149,11 @@ function Preparing({ league, entries, capacity }) {
           {entries.map((e, i) => (
             <li key={e.entry_id} className="card flex items-center gap-4 px-5 py-3">
               <span className="font-mono text-xs text-white/30">{String(i + 1).padStart(2, '0')}</span>
-              <Avatar src={e.user_photo} name={e.efootball_id} />
+              <Avatar src={e.user_photo} name={e.user_name} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-chalk">{e.team_name}</p>
                 <p className="truncate text-xs text-white/40">
-                  {e.efootball_id} ・ ⚔{e.attack_formation} 🛡{e.defence_formation} ・ {e.team_style}
+                  {e.user_name} ・ ⚔{e.attack_formation} 🛡{e.defence_formation} ・ {e.team_style}
                 </p>
               </div>
               <span className="font-mono text-sm text-volt">{e.team_power}</span>
@@ -210,11 +210,11 @@ function GroupTable({ pool }) {
                 </td>
                 <td className="px-2 py-3">
                   <div className="flex items-center gap-3">
-                    <Avatar src={r.user_photo} name={r.efootball_id} size="h-8 w-8" />
+                    <Avatar src={r.user_photo} name={r.user_name} size="h-8 w-8" />
                     <div className="min-w-0">
                       <p className="truncate font-bold text-chalk">{r.team_name}</p>
                       <p className="truncate text-[11px] text-chalk/40">
-                        {r.efootball_id} ・ ⚔{r.attack_formation} 🛡{r.defence_formation} ・ TP{' '}
+                        {r.user_name} ・ ⚔{r.attack_formation} 🛡{r.defence_formation} ・ TP{' '}
                         {r.team_power}
                       </p>
                     </div>

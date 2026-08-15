@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getLeague, getMatch, saveMatchResult } from '@/lib/league';
+import { authenticateAs, AuthError } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -10,24 +11,17 @@ export async function POST(req, { params }) {
     const matchId = Number(params.id);
     const body = await req.json();
     const stats = body.stats || {};
-    const efootballId = String(body.efootball_id || '').trim();
 
     const match = await getMatch(matchId);
     if (!match) return NextResponse.json({ error: '試合が見つかりません' }, { status: 404 });
 
     // --- 本人確認: 結果を登録できるのはホーム側のみ ---
-    if (!efootballId) {
-      return NextResponse.json({ error: 'あなたの efootball ID を入力してください' }, { status: 400 });
-    }
-    if (efootballId.toLowerCase() !== String(match.home_efootball_id).toLowerCase()) {
-      return NextResponse.json(
-        {
-          error: `結果を登録できるのはホーム側（${match.home_efootball_id}）だけです。` +
-            `アウェイの方は、ホームの登録後に承認をお願いします。`,
-        },
-        { status: 403 }
-      );
-    }
+    await authenticateAs(
+      body.efootball_user_id,
+      match.home_user_id,
+      `結果を登録できるのはホーム側（${match.home_user_name}）だけです。` +
+        `アウェイの方は、ホームの登録後に承認をお願いします。`
+    );
 
     if (stats.home_score === '' || stats.home_score == null ||
         stats.away_score === '' || stats.away_score == null) {
@@ -47,9 +41,12 @@ export async function POST(req, { params }) {
     return NextResponse.json({
       ok: true,
       status: 'pending',
-      awaiting: match.away_efootball_id,
+      awaiting: match.away_user_name,
     });
   } catch (e) {
+    if (e instanceof AuthError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

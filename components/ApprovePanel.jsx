@@ -1,30 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import UserIdInput, { rememberUserId } from './UserIdInput';
 import { STAT_KEYS } from '@/lib/schema';
 
 /** アウェイ側が、ホームの登録した結果を承認 / 差し戻しするパネル */
 export default function ApprovePanel({
-  matchId, leagueId, homeName, awayName, awayEfootballId, homeEfootballId,
+  matchId, leagueId, homeName, awayName, awayUserName, homeUserName,
   stats, imagePath, reportedAt,
 }) {
   const router = useRouter();
-  const [efootballId, setEfootballId] = useState('');
+  const [userId, setUserId] = useState('');
   const [note, setNote] = useState('');
   const [showReject, setShowReject] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [done, setDone] = useState(null); // 'approved' | 'rejected'
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('efootball_id');
-      if (saved) setEfootballId(saved);
-    } catch {}
-  }, []);
-
-  const isAway = efootballId.trim().toLowerCase() === String(awayEfootballId).toLowerCase();
 
   async function send(action) {
     setBusy(true);
@@ -33,11 +25,11 @@ export default function ApprovePanel({
       const res = await fetch(`/api/matches/${matchId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ efootball_id: efootballId, action, note }),
+        body: JSON.stringify({ efootball_user_id: userId, action, note }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '処理に失敗しました');
-      try { localStorage.setItem('efootball_id', efootballId); } catch {}
+      rememberUserId(userId);
       setDone(action === 'reject' ? 'rejected' : 'approved');
       setTimeout(() => {
         router.push(`/leagues/${leagueId}`);
@@ -57,8 +49,8 @@ export default function ApprovePanel({
         </p>
         <p className="mt-4 text-sm text-white/60">
           {done === 'approved'
-            ? 'リーグ表と matches.csv に反映されました。'
-            : `${homeEfootballId} さんに登録し直してもらってください。`}
+            ? 'リーグ表と集計に反映されました。'
+            : `${homeUserName} さんに登録し直してもらってください。`}
         </p>
       </div>
     );
@@ -72,9 +64,9 @@ export default function ApprovePanel({
       <div className="rounded-xl border border-amber-400/40 bg-amber-400/[0.06] p-5 text-sm">
         <p className="font-bold text-amber-300">アウェイの承認待ちです</p>
         <p className="mt-2 text-white/60">
-          ホームの <span className="text-chalk">{homeEfootballId}</span> さんが結果を登録しました
+          ホームの <span className="text-chalk">{homeUserName}</span> さんが結果を登録しました
           {reportedAt ? `（${reportedAt}）` : ''}。内容を確認して、アウェイの{' '}
-          <span className="text-chalk">{awayEfootballId}</span> さんが承認してください。
+          <span className="text-chalk">{awayUserName}</span> さんが承認してください。
           承認されるまでリーグ表には反映されません。
         </p>
       </div>
@@ -116,24 +108,18 @@ export default function ApprovePanel({
 
       {/* 承認 */}
       <section className="card p-6">
-        <p className="label mb-4">あなたの efootball ID</p>
-        <input
-          className="field"
-          value={efootballId}
-          onChange={(e) => setEfootballId(e.target.value)}
-          placeholder={awayEfootballId}
+        <UserIdInput
+          value={userId}
+          onChange={setUserId}
+          label="あなたのユーザーID"
+          hint={`承認できるのはアウェイ側の ${awayUserName} さんです。`}
         />
-        {efootballId && !isAway && (
-          <p className="mt-3 text-xs text-amber-300">
-            承認できるのはアウェイ側の {awayEfootballId} さんだけです。
-          </p>
-        )}
 
         {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
         <button
           onClick={() => send('approve')}
-          disabled={busy || !efootballId}
+          disabled={busy || !userId}
           className="btn-volt mt-6 w-full"
         >
           {busy ? '送信中…' : 'この結果を承認する'}
@@ -159,7 +145,7 @@ export default function ApprovePanel({
             <button
               type="button"
               onClick={() => send('reject')}
-              disabled={busy || !efootballId}
+              disabled={busy || !userId}
               className="btn-ghost mt-4 w-full !border-amber-400/50 !text-amber-300"
             >
               差し戻してホームに再登録を依頼する
