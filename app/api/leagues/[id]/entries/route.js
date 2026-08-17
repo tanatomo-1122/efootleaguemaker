@@ -3,6 +3,7 @@ import { sql } from '@/lib/db';
 import { saveUpload } from '@/lib/storage';
 import { getLeague, tryCloseAndDraw, listEntries, withdrawEntry } from '@/lib/league';
 import { authenticate, AuthError } from '@/lib/auth';
+import { parseFormation } from '@/lib/formation';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -26,17 +27,24 @@ export async function POST(req, { params }) {
 
     const form = await req.formData();
     const teamName = String(form.get('team_name') || '').trim();
-    const attackFormation = String(form.get('attack_formation') || '').trim();
-    const defenceFormation = String(form.get('defence_formation') || '').trim();
+    // フォーメーションは自由記述。画面と同じ関数で補正・検証する
+    const attack = parseFormation(form.get('attack_formation'));
+    const defence = parseFormation(form.get('defence_formation'));
     const teamStyle = String(form.get('team_style') || '').trim();
     const teamPower = Number(form.get('team_power'));
 
     if (!teamName) return NextResponse.json({ error: 'スカッド名を入力してください' }, { status: 400 });
-    if (!attackFormation) {
-      return NextResponse.json({ error: '攻撃時フォーメーションを選択してください' }, { status: 400 });
+    if (!attack.ok) {
+      return NextResponse.json(
+        { error: `攻撃時フォーメーション: ${attack.error}` },
+        { status: 400 }
+      );
     }
-    if (!defenceFormation) {
-      return NextResponse.json({ error: '守備時フォーメーションを選択してください' }, { status: 400 });
+    if (!defence.ok) {
+      return NextResponse.json(
+        { error: `守備時フォーメーション: ${defence.error}` },
+        { status: 400 }
+      );
     }
     if (!teamStyle) return NextResponse.json({ error: 'チームスタイルを選択してください' }, { status: 400 });
     if (!Number.isFinite(teamPower) || teamPower <= 0) {
@@ -78,7 +86,7 @@ export async function POST(req, { params }) {
         INSERT INTO squads
           (user_id, team_name, attack_formation, defence_formation, team_style, team_power, photo_path)
         VALUES (
-          ${user.user_id}, ${teamName}, ${attackFormation}, ${defenceFormation},
+          ${user.user_id}, ${teamName}, ${attack.formatted}, ${defence.formatted},
           ${teamStyle}, ${Math.round(teamPower)}, ${photoPath}
         )
         RETURNING squad_id

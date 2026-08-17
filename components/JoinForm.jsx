@@ -4,18 +4,21 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PhotoInput from './PhotoInput';
 import UserIdInput, { rememberUserId } from './UserIdInput';
+import FormationInput from './FormationInput';
 import { FORMATIONS, TEAM_STYLES } from '@/lib/schema';
+import { parseFormation } from '@/lib/formation';
 
 export default function JoinForm({ leagueId, remaining }) {
   const router = useRouter();
   const [userId, setUserId] = useState('');
   const [form, setForm] = useState({
     team_name: '',
-    attack_formation: '4-3-3',
-    defence_formation: '4-4-2',
+    attack_formation: '',
+    defence_formation: '',
     team_style: 'ポゼッション',
     team_power: '',
   });
+  const [showFormationError, setShowFormationError] = useState(false);
   const [photo, setPhoto] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -25,6 +28,20 @@ export default function JoinForm({ leagueId, remaining }) {
 
   async function submit(e) {
     e.preventDefault();
+
+    // 送信時にもう一度だけ確認する（入力中は黙っている）
+    const atk = parseFormation(form.attack_formation);
+    const def = parseFormation(form.defence_formation);
+    if (!atk.ok || !def.ok) {
+      setShowFormationError(true);
+      setError(
+        !atk.ok
+          ? `攻撃時フォーメーション: ${atk.error}`
+          : `守備時フォーメーション: ${def.error}`
+      );
+      return;
+    }
+
     setBusy(true);
     setError(null);
     try {
@@ -96,25 +113,23 @@ export default function JoinForm({ leagueId, remaining }) {
           </label>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            <label className="block">
-              <span className="wc-head mb-2 block">⚔ 攻撃時フォーメーション</span>
-              <select className="field" value={form.attack_formation} onChange={set('attack_formation')}>
-                {FORMATIONS.map((f) => (
-                  <option key={f} value={f}>{f}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="wc-head mb-2 block">🛡 守備時フォーメーション</span>
-              <select className="field" value={form.defence_formation} onChange={set('defence_formation')}>
-                {FORMATIONS.map((f) => (
-                  <option key={f} value={f}>{f}</option>
-                ))}
-              </select>
-            </label>
+            <FormationInput
+              label="⚔ 攻撃時フォーメーション"
+              value={form.attack_formation}
+              onChange={(v) => setForm((f) => ({ ...f, attack_formation: v }))}
+              suggestions={FORMATIONS.slice(0, 6)}
+              showError={showFormationError}
+            />
+            <FormationInput
+              label="🛡 守備時フォーメーション"
+              value={form.defence_formation}
+              onChange={(v) => setForm((f) => ({ ...f, defence_formation: v }))}
+              suggestions={FORMATIONS.slice(0, 6)}
+              showError={showFormationError}
+            />
           </div>
           <p className="-mt-2 text-xs text-white/35">
-            攻撃時と守備時で形を変えている場合は、それぞれ選んでください。同じでも構いません。
+            攻撃時と守備時で形を変えている場合は、それぞれ入力してください。同じでも構いません。
           </p>
 
           <label className="block">
