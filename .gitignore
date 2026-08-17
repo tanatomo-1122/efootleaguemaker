@@ -2,8 +2,9 @@ node_modules
 .next
 .env
 .env.local
-exports/
 .DS_Store
 
-# 旧ローカルSQLite（Supabase 移行後は不要）
-data/
+# 先頭の / はリポジトリ直下だけを指す。
+# これが無いと app/data/ のような同名ディレクトリまで巻き込むので必須。
+/data/
+/exports/
