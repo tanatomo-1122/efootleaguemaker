@@ -123,6 +123,21 @@ create table if not exists public.matches (
   home_saves           double precision, away_saves           double precision
 );
 
+-- ---------------------------------------------------------------
+-- match_messages（対戦相手とのトーク）
+--   試合中の連絡用。結果が承認された時点で消える。
+--   読み書きできるのはその試合の2人だけ（アプリ側で制御）。
+-- ---------------------------------------------------------------
+create table if not exists public.match_messages (
+  message_id int generated always as identity primary key,
+  match_id   int  not null references public.matches(match_id) on delete cascade,
+  user_id    int  not null references public.users(user_id),
+  body       text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_match_messages on public.match_messages (match_id, message_id);
+
 create index if not exists idx_entries_league on public.entries (league_id);
 create index if not exists idx_matches_league on public.matches (league_id, pool_index, round);
 create index if not exists idx_matches_status on public.matches (status);
@@ -134,11 +149,12 @@ create index if not exists idx_matches_status on public.matches (status);
 --   anon / authenticated キーからは何も読めない状態にします。
 --   ＝ 生の試合データを外から取得されない（データの囲い込み）
 -- =====================================================================
-alter table public.users   enable row level security;
-alter table public.leagues enable row level security;
-alter table public.squads  enable row level security;
-alter table public.entries enable row level security;
-alter table public.matches enable row level security;
+alter table public.users          enable row level security;
+alter table public.leagues        enable row level security;
+alter table public.squads         enable row level security;
+alter table public.entries        enable row level security;
+alter table public.matches        enable row level security;
+alter table public.match_messages enable row level security;
 
 -- =====================================================================
 -- Storage

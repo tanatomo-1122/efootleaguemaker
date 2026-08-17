@@ -5,6 +5,7 @@ import { STAT_COLUMNS } from '@/lib/schema';
 import ReportForm from '@/components/ReportForm';
 import ApprovePanel from '@/components/ApprovePanel';
 import RoomPanel from '@/components/RoomPanel';
+import ChatPanel from '@/components/ChatPanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,15 +44,22 @@ export default async function ReportPage({ params }) {
         <Side name={match.away_team_name} user={match.away_user_name} side="AWAY（承認する側）" align="text-right" />
       </div>
 
-      {/* 対戦部屋: まだ試合が終わっていないときだけ出す */}
+      {/* 対戦部屋とトーク: まだ試合が終わっていないときだけ出す */}
       {!league.cancelled && league.status !== 'finished' && match.status !== 'reported' && (
-        <RoomPanel
-          matchId={matchId}
-          homeUserName={match.home_user_name}
-          awayUserName={match.away_user_name}
-          hasRoom={match.room_code !== null}
-          roomPostedAt={formatTime(match.room_posted_at)}
-        />
+        <>
+          <RoomPanel
+            matchId={matchId}
+            homeUserName={match.home_user_name}
+            awayUserName={match.away_user_name}
+            hasRoom={match.room_code !== null}
+            roomPostedAt={formatTime(match.room_posted_at)}
+          />
+          <ChatPanel
+            matchId={matchId}
+            homeUserName={match.home_user_name}
+            awayUserName={match.away_user_name}
+          />
+        </>
       )}
 
       {league.cancelled ? (
