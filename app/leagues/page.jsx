@@ -11,7 +11,8 @@ const STATUS = {
 };
 
 export default async function LeaguesPage() {
-  const leagues = await listLeagues();
+  // 終了した大会は出さない（結果は「みんなのデータ」で見られる）
+  const leagues = await listLeagues({ excludeFinished: true });
 
   return (
     <div>
@@ -34,6 +35,11 @@ export default async function LeaguesPage() {
           </div>
           <Link href="/leagues/new" className="btn-ghost">＋ リーグを主催する</Link>
         </div>
+
+        <p className="-mt-8 mb-8 text-xs text-white/30">
+          終了した大会はここには出ません。結果は{' '}
+          <Link href="/data" className="text-volt underline">みんなのデータ</Link> から見られます。
+        </p>
 
         {leagues.length === 0 ? (
           <Empty />

@@ -1,4 +1,6 @@
-import { formationWinRates, formationMatrix, publicSummary } from '@/lib/analytics';
+import {
+  formationWinRates, formationMatrix, publicSummary, finishedLeagueChampions,
+} from '@/lib/analytics';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'みんなのデータ | efootleaguemaker' };
@@ -8,10 +10,11 @@ export const metadata = { title: 'みんなのデータ | efootleaguemaker' };
  * 生の試合スタッツやスカッド一覧、CSV は公開しない（運営が npm run export で取り出す）。
  */
 export default async function DataPage() {
-  const [summary, rates, { axis, matrix }] = await Promise.all([
+  const [summary, rates, { axis, matrix }, finished] = await Promise.all([
     publicSummary(),
     formationWinRates(),
     formationMatrix(),
+    finishedLeagueChampions(),
   ]);
 
   return (
@@ -28,6 +31,55 @@ export default async function DataPage() {
         <Kpi n={summary.players} label="参加プレイヤー" />
         <Kpi n={summary.leagues} label="開催リーグ" />
       </div>
+
+      {/* ---------- 終了した大会の記録 ---------- */}
+      <h2 className="headline mt-16 text-3xl text-chalk">
+        歴代の<span className="text-volt">大会結果</span>
+      </h2>
+      <p className="mt-2 text-xs text-white/40">
+        確定した大会と、その勝ち抜けた人（グループ1位）です。
+      </p>
+
+      {finished.length === 0 ? (
+        <p className="card mt-6 p-12 text-center text-sm text-white/40">
+          まだ確定した大会がありません。
+        </p>
+      ) : (
+        <div className="mt-6 space-y-4">
+          {finished.map((l) => (
+            <article key={l.league_id} className="wc-panel overflow-hidden">
+              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-gold/20 px-5 py-3">
+                <h3 className="font-display text-xl uppercase italic text-gold">{l.league_name}</h3>
+                <span className="wc-head">
+                  {l.entry_count}人 ・ {l.pool_count}グループ ・ {formatDate(l.created_at)}
+                </span>
+              </header>
+
+              <ul className="divide-y divide-white/5">
+                {l.champions.map((c) => (
+                  <li key={c.pool_index} className="flex flex-wrap items-center gap-4 px-5 py-4">
+                    <span className="trophy-glow text-2xl">🏆</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-display text-lg text-chalk">{c.team_name}</p>
+                      <p className="truncate text-xs text-white/40">
+                        {c.user_name} ・ ⚔{c.attack_formation} 🛡{c.defence_formation}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-mono text-sm text-gold">
+                        勝点 {c.points} ・ 得失 {c.goal_diff > 0 ? `+${c.goal_diff}` : c.goal_diff}
+                      </p>
+                      <p className="wc-head mt-0.5">
+                        {l.pool_count > 1 ? `GROUP ${c.label} 優勝` : '優勝'}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      )}
 
       {/* ---------- フォーメーション別勝率 ---------- */}
       <h2 className="headline mt-16 text-3xl text-chalk">
@@ -131,6 +183,12 @@ export default async function DataPage() {
       </p>
     </div>
   );
+}
+
+function formatDate(v) {
+  if (!v) return '';
+  const d = new Date(v);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('ja-JP');
 }
 
 function Cell({ cell, same }) {

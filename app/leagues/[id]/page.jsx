@@ -7,6 +7,7 @@ import FinalizeButton from '@/components/FinalizeButton';
 import Bracket from '@/components/Bracket';
 import WithdrawButton from '@/components/WithdrawButton';
 import CancelLeagueButton from '@/components/CancelLeagueButton';
+import OrganizerPanel from '@/components/OrganizerPanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -183,6 +184,15 @@ function Preparing({ league, entries, capacity }) {
 
       <div className="flex flex-col items-center">
         {!cancelled && <WithdrawButton leagueId={league.league_id} />}
+        {!cancelled && (
+          <OrganizerPanel
+            leagueId={league.league_id}
+            organizerUserName={league.organizer_user_name}
+            entryCount={entries.length}
+            playersPerPool={league.players_per_pool}
+            poolCount={league.pool_count}
+          />
+        )}
         <CancelLeagueButton
           leagueId={league.league_id}
           organizerUserName={league.organizer_user_name}

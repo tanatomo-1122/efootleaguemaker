@@ -38,6 +38,7 @@ function Header() {
           <Link href="/register" className="px-2 py-1 text-white/60 hover:text-volt">登録</Link>
           <Link href="/leagues/new" className="px-2 py-1 text-white/60 hover:text-volt">主催</Link>
           <Link href="/data" className="px-2 py-1 text-white/60 hover:text-volt">データ</Link>
+          <Link href="/me" className="px-2 py-1 text-volt hover:brightness-125">マイページ</Link>
         </nav>
       </div>
     </header>
