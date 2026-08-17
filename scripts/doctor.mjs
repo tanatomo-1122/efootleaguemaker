@@ -88,12 +88,36 @@ for (const [name, fn] of jobs) {
   }
 }
 
-const t = Date.now();
-await Promise.all(jobs.map(([, fn]) => fn()));
-console.log(`  ${'4本まとめて'.padEnd(24)} ${String(Date.now() - t).padStart(6)}ms`);
+// --- 5. 同時実行できるか（ここで止まるなら接続プール側の問題） ---
+console.log('\n--- 同時実行の確認 ---');
+
+const withTimeout = (promise, ms) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`${ms}ms 待っても返らず`)), ms)),
+  ]);
+
+let concurrencyLimit = null;
+for (const n of [2, 3, 4, 6]) {
+  const t = Date.now();
+  try {
+    await withTimeout(Promise.all(Array.from({ length: n }, () => sql`select 1 as x`)), 8000);
+    console.log(`  ${String(n).padStart(2)}本同時  ${String(Date.now() - t).padStart(6)}ms  OK`);
+  } catch (e) {
+    console.log(`  ${String(n).padStart(2)}本同時  ✘ ${e.message}`);
+    concurrencyLimit = n;
+    break;
+  }
+}
 
 console.log('\n--- 判定 ---');
-if (slowest < 1000) {
+if (concurrencyLimit !== null) {
+  console.log(`  同時に ${concurrencyLimit} 本のクエリを投げると返ってこなくなります。`);
+  console.log('  接続プール側の問題です。次のどちらかで直ります:');
+  console.log('    (a) .env.local に PGPOOL_MAX=1 を追加する（全クエリを1本ずつ流す）');
+  console.log('    (b) Supabase の Connection pooling の Pool Size を増やす');
+  console.log('  ※ アプリ側は同時実行をやめる修正済みなので、(a) は保険です。');
+} else if (slowest < 1000) {
   console.log('  DB は正常です。画面が重いなら Next.js 側（初回コンパイル等）が原因です。');
   console.log('  .next を消して開き直すと直ることがあります: rm -rf .next && npm run dev');
 } else {
@@ -101,3 +125,4 @@ if (slowest < 1000) {
 }
 
 await sql.end({ timeout: 5 });
+process.exit(0);

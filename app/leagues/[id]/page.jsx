@@ -24,12 +24,11 @@ export default async function LeaguePage({ params }) {
     return <Preparing league={league} entries={entries} capacity={capacity} />;
   }
 
-  const [pools, matches, bracket, finalizable] = await Promise.all([
-    buildStandings(leagueId),
-    listMatches(leagueId),
-    buildBracket(leagueId),
-    canFinalize(leagueId),
-  ]);
+  // 直列に取る（プーラー経由だと同時実行で詰まることがあるため）
+  const pools = await buildStandings(leagueId);
+  const matches = await listMatches(leagueId);
+  const bracket = await buildBracket(leagueId);
+  const finalizable = await canFinalize(leagueId);
   const done = matches.filter((m) => m.status === 'reported').length;
   const pending = matches.filter((m) => m.status === 'pending').length;
   const finished = league.status === 'finished';

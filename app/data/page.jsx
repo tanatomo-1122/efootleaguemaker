@@ -10,12 +10,12 @@ export const metadata = { title: 'みんなのデータ | efootleaguemaker' };
  * 生の試合スタッツやスカッド一覧、CSV は公開しない（運営が npm run export で取り出す）。
  */
 export default async function DataPage() {
-  const [summary, rates, { axis, matrix }, finished] = await Promise.all([
-    publicSummary(),
-    formationWinRates(),
-    formationMatrix(),
-    finishedLeagueChampions(),
-  ]);
+  // 直列に取る。プーラー経由だと同時実行で詰まることがあるうえ、
+  // どれも数十msなので並列にする利点がない。
+  const summary = await publicSummary();
+  const rates = await formationWinRates();
+  const { axis, matrix } = await formationMatrix();
+  const finished = await finishedLeagueChampions();
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-14">
