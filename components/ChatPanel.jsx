@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import UserIdInput, { rememberUserId } from './UserIdInput';
 
-const POLL_MS = 5000;
+const POLL_MS = 10000;
+// 動きが無いまま放置されたタブが延々と叩き続けないよう、15分で止める
+const IDLE_STOP_MS = 15 * 60 * 1000;
 const MAX_LENGTH = 300;
 
 // 状況共有でよく使う一言。タップですぐ送れる
@@ -31,9 +33,11 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
   const [error, setError] = useState(null);
   const [closed, setClosed] = useState(false);
 
+  const [paused, setPaused] = useState(false);
   const lastIdRef = useRef(0);
   const idRef = useRef('');
   const bottomRef = useRef(null);
+  const lastActivityRef = useRef(Date.now());
 
   const fetchMessages = useCallback(async ({ action = 'list', body, incremental } = {}) => {
     const res = await fetch(`/api/matches/${matchId}/chat`, {
@@ -54,6 +58,8 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
       setMessages([]);
       return data;
     }
+
+    if (data.messages.length > 0) lastActivityRef.current = Date.now();
 
     setMessages((prev) => {
       const next = incremental ? [...prev, ...data.messages] : data.messages;
@@ -83,6 +89,8 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
     if (!body) return;
     setSending(true);
     setError(null);
+    lastActivityRef.current = Date.now();
+    setPaused(false);
     try {
       await fetchMessages({ action: 'post', body, incremental: true });
       setDraft('');
@@ -93,15 +101,25 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
     }
   }
 
-  // 新着の取得（開いている間だけ / タブが裏なら休む）
+  // 新着の取得（開いている間だけ / タブが裏なら休む / 放置されたら止める）
   useEffect(() => {
-    if (!unlocked || closed) return;
+    if (!unlocked || closed || paused) return;
     const timer = setInterval(() => {
       if (document.visibilityState !== 'visible') return;
+      if (Date.now() - lastActivityRef.current > IDLE_STOP_MS) {
+        setPaused(true);
+        return;
+      }
       fetchMessages({ incremental: true }).catch(() => {});
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [unlocked, closed, fetchMessages]);
+  }, [unlocked, closed, paused, fetchMessages]);
+
+  function resume() {
+    lastActivityRef.current = Date.now();
+    setPaused(false);
+    fetchMessages({ incremental: true }).catch(() => {});
+  }
 
   // 新しいメッセージが来たら一番下へ
   useEffect(() => {
@@ -113,10 +131,20 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="label">トーク</p>
         {unlocked && !closed && (
-          <span className="flex items-center gap-2 text-[10px] tracking-widest text-white/35">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-volt" />
-            自動更新中
-          </span>
+          paused ? (
+            <button
+              type="button"
+              onClick={resume}
+              className="rounded-full border border-white/20 px-3 py-1 text-[10px] tracking-widest text-white/50 hover:border-volt hover:text-volt"
+            >
+              自動更新は停止中 ・ 再開する
+            </button>
+          ) : (
+            <span className="flex items-center gap-2 text-[10px] tracking-widest text-white/35">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-volt" />
+              自動更新中
+            </span>
+          )
         )}
       </div>
 

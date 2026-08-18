@@ -8,6 +8,7 @@ import RoomPanel from '@/components/RoomPanel';
 import ChatPanel from '@/components/ChatPanel';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 20;
 
 export default async function ReportPage({ params }) {
   const matchId = Number(params.id);

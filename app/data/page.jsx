@@ -3,6 +3,7 @@ import {
 } from '@/lib/analytics';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 20;
 export const metadata = { title: 'みんなのデータ | efootleaguemaker' };
 
 /**

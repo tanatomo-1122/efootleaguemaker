@@ -10,6 +10,7 @@ import CancelLeagueButton from '@/components/CancelLeagueButton';
 import OrganizerPanel from '@/components/OrganizerPanel';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 20;
 
 export default async function LeaguePage({ params }) {
   const leagueId = Number(params.id);

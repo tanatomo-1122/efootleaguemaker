@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { listLeagues } from '@/lib/league';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 20;
 
 export default async function HomePage() {
   const leagues = await listLeagues();

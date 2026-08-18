@@ -4,6 +4,8 @@ import { authenticateAs, AuthError } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+// 詰まっても関数を長時間占有しないよう、上限を明示する
+export const maxDuration = 15;
 
 /** ホーム側が結果を登録する（アウェイの承認待ちになる） */
 export async function POST(req, { params }) {

@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getLeague, getMatch, listMessages, postMessage, MESSAGE_MAX } from '@/lib/league';
-import { authenticate, AuthError } from '@/lib/auth';
+import { chatSnapshot, postMessage, MESSAGE_MAX } from '@/lib/league';
+import { AuthError, isValidUserId, normalizeUserId, USER_ID_PLACEHOLDER } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+// 詰まっても関数を長時間占有しないよう、上限を明示する
+export const maxDuration = 15;
 
 /**
  * 対戦相手とのトーク。読み書きどちらもこの1本で扱う。
@@ -11,6 +13,8 @@ export const dynamic = 'force-dynamic';
  *
  * ユーザーIDをURLに載せないよう、読み取りも POST にしている。
  * トークが使えるのは試合中（結果が承認されるまで）だけ。
+ *
+ * ポーリングで繰り返し叩かれるので、読み取りは DB 1往復で済ませている。
  */
 export async function POST(req, { params }) {
   try {
@@ -18,22 +22,39 @@ export async function POST(req, { params }) {
     const payload = await req.json().catch(() => ({}));
     const action = payload.action === 'post' ? 'post' : 'list';
 
-    const match = await getMatch(matchId);
-    if (!match) return NextResponse.json({ error: '試合が見つかりません' }, { status: 404 });
-
-    // --- 本人確認: 使えるのは対戦する2人だけ ---
-    const user = await authenticate(payload.efootball_user_id);
-    if (user.user_id !== match.home_user_id && user.user_id !== match.away_user_id) {
+    const userId = normalizeUserId(payload.efootball_user_id);
+    if (!String(payload.efootball_user_id ?? '').trim()) {
+      throw new AuthError('ユーザーIDを入力してください', 400);
+    }
+    if (!isValidUserId(userId)) {
       throw new AuthError(
-        `トークを使えるのは、この試合の対戦者（${match.home_user_name} / ${match.away_user_name}）だけです`,
+        `ユーザーIDの形式が違います（${USER_ID_PLACEHOLDER} のような形式です）`,
+        400
+      );
+    }
+
+    // 試合・リーグ・本人確認・メッセージをまとめて1回で取る
+    let snap = await chatSnapshot(matchId, userId, payload.after_id);
+    if (!snap) return NextResponse.json({ error: '試合が見つかりません' }, { status: 404 });
+
+    if (!snap.me_user_id) {
+      throw new AuthError(
+        'そのユーザーIDは登録されていません。先にユーザー登録を行ってください',
+        401
+      );
+    }
+    if (snap.me_user_id !== snap.home_user_id && snap.me_user_id !== snap.away_user_id) {
+      throw new AuthError(
+        `トークを使えるのは、この試合の対戦者（${snap.home_user_name} / ${snap.away_user_name}）だけです`,
         403
       );
     }
 
     // --- 試合中かどうか ---
-    const league = await getLeague(match.league_id);
     const closed =
-      league.cancelled || league.status === 'finished' || match.status === 'reported';
+      snap.league_cancelled ||
+      snap.league_status === 'finished' ||
+      snap.match_status === 'reported';
     if (closed) {
       return NextResponse.json({
         ok: true,
@@ -44,21 +65,22 @@ export async function POST(req, { params }) {
     }
 
     if (action === 'post') {
-      await postMessage(matchId, user.user_id, payload.body);
+      await postMessage(matchId, snap.me_user_id, payload.body);
+      // 投稿した分を含めて取り直す
+      snap = await chatSnapshot(matchId, userId, payload.after_id);
     }
 
-    const messages = await listMessages(matchId, payload.after_id);
     return NextResponse.json({
       ok: true,
       closed: false,
-      me: user.user_id,
+      me: snap.me_user_id,
       max_length: MESSAGE_MAX,
-      messages: messages.map((m) => ({
+      messages: (snap.messages ?? []).map((m) => ({
         message_id: m.message_id,
         user_name: m.user_name,
         body: m.body,
         created_at: m.created_at,
-        mine: m.user_id === user.user_id,
+        mine: m.user_id === snap.me_user_id,
       })),
     });
   } catch (e) {

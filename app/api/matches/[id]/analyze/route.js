@@ -26,6 +26,19 @@ export async function POST(req, { params }) {
       return NextResponse.json({ error: '画像を選択してください' }, { status: 400 });
     }
 
+    // ブラウザ側で圧縮しているので、ここに大きな画像は来ないはず。
+    // 来たら早めに断る（Vercel のボディ上限 4.5MB に当たる前に）。
+    const MAX_BYTES = 4 * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      return NextResponse.json(
+        {
+          error: `画像が大きすぎます（${(file.size / 1024 / 1024).toFixed(1)}MB）。` +
+            'スクリーンショットを撮り直すか、手入力で登録してください。',
+        },
+        { status: 413 }
+      );
+    }
+
     imagePath = await saveUpload(file, `match${matchId}`);
     const { base64, mediaType } = await fileToBase64(file);
     const parsed = await extractMatchStats(base64, mediaType);

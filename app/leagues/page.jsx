@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { listLeagues, listEntries } from '@/lib/league';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 20;
 export const metadata = { title: '試合募集 | efootleaguemaker' };
 
 const STATUS = {

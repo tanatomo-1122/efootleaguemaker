@@ -157,7 +157,7 @@ export default function JoinForm({ leagueId, remaining }) {
       </Section>
 
       <Section n="03" title="スカッドのスクリーンショット">
-        <PhotoInput onChange={setPhoto} hint="スカッド画面のスクショを選ぶ" />
+        <PhotoInput onChange={setPhoto} hint="スカッド画面のスクショを選ぶ" preset="squad" />
         <p className="mt-3 text-xs text-white/35">
           フォーメーション確認用。対戦相手も閲覧できます。
         </p>

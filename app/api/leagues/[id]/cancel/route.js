@@ -4,6 +4,8 @@ import { authenticateAs, AuthError } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+// 詰まっても関数を長時間占有しないよう、上限を明示する
+export const maxDuration = 15;
 
 /**
  * リーグの中止 / 再開。主催者だけが実行できる。

@@ -94,7 +94,7 @@ export default function RegisterForm() {
             プロフィール写真 <span className="text-white/30">(任意)</span>
           </label>
         </div>
-        <PhotoInput onChange={setPhoto} hint="タップして画像を選ぶ" />
+        <PhotoInput onChange={setPhoto} hint="タップして画像を選ぶ" preset="avatar" />
       </div>
 
       {msg && (

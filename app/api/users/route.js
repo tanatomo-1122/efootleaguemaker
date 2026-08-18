@@ -7,6 +7,8 @@ import {
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+// 詰まっても関数を長時間占有しないよう、上限を明示する
+export const maxDuration = 15;
 
 /** 公開情報のみ返す（ユーザーIDは絶対に返さない） */
 export async function GET() {

@@ -4,6 +4,7 @@ import { getLeague, listEntries } from '@/lib/league';
 import JoinForm from '@/components/JoinForm';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 20;
 
 export default async function JoinPage({ params }) {
   const leagueId = Number(params.id);

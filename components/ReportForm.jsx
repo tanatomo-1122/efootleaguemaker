@@ -117,7 +117,7 @@ export default function ReportForm({
       {/* ---------- 画像アップロード ---------- */}
       <section className="card p-6">
         <p className="label mb-4">Step 2 / 試合結果の写真を送る</p>
-        <PhotoInput onChange={setFile} hint="試合結果 or マッチスタッツ画面のスクショ" />
+        <PhotoInput onChange={setFile} hint="試合結果 or マッチスタッツ画面のスクショ" preset="result" />
         <button
           type="button"
           onClick={analyze}
