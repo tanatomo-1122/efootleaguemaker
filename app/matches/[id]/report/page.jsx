@@ -6,6 +6,8 @@ import ReportForm from '@/components/ReportForm';
 import ApprovePanel from '@/components/ApprovePanel';
 import RoomPanel from '@/components/RoomPanel';
 import ChatPanel from '@/components/ChatPanel';
+import OrganizerMatchPanel from '@/components/OrganizerMatchPanel';
+import Presence from '@/components/Presence';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 20;
@@ -40,10 +42,25 @@ export default async function ReportPage({ params }) {
       </p>
 
       <div className="mt-4 flex items-center justify-between gap-4">
-        <Side name={match.home_team_name} user={match.home_user_name} side="HOME（結果を登録する側）" align="text-left" />
+        <Side
+          name={match.home_team_name} user={match.home_user_name}
+          lastSeenAt={match.home_last_seen_at}
+          side="HOME（結果を登録する側）" align="text-left"
+        />
         <span className="font-display text-2xl italic text-white/25">VS</span>
-        <Side name={match.away_team_name} user={match.away_user_name} side="AWAY（承認する側）" align="text-right" />
+        <Side
+          name={match.away_team_name} user={match.away_user_name}
+          lastSeenAt={match.away_last_seen_at}
+          side="AWAY（承認する側）" align="text-right"
+        />
       </div>
+
+      {match.admin_note && (
+        <p className="mt-6 rounded-xl border border-amber-400/30 bg-amber-400/[0.05] px-5 py-3 text-xs text-amber-200/90">
+          この試合は{match.approved_by_user_name ? `${match.approved_by_user_name} さん（主催者）` : '主催者'}
+          が代理で処理しました。{match.admin_note}
+        </p>
+      )}
 
       {/* 対戦部屋とトーク: まだ試合が終わっていないときだけ出す */}
       {!league.cancelled && league.status !== 'finished' && match.status !== 'reported' && (
@@ -116,6 +133,21 @@ export default async function ReportPage({ params }) {
           />
         </>
       )}
+
+      {/* 相手が音信不通のときの逃げ道（主催者のみ実行できる） */}
+      {!league.cancelled && league.status !== 'finished' && (
+        <OrganizerMatchPanel
+          matchId={matchId}
+          leagueId={match.league_id}
+          organizerUserName={league.organizer_user_name}
+          homeName={match.home_team_name}
+          awayName={match.away_team_name}
+          homeUserName={match.home_user_name}
+          awayUserName={match.away_user_name}
+          matchStatus={match.status}
+          initialStats={stats}
+        />
+      )}
     </div>
   );
 }
@@ -152,12 +184,15 @@ function StatusChip({ status }) {
   );
 }
 
-function Side({ name, user, side, align }) {
+function Side({ name, user, side, align, lastSeenAt }) {
   return (
     <div className={`min-w-0 flex-1 ${align}`}>
       <p className="label">{side}</p>
       <p className="mt-1 truncate font-display text-2xl text-chalk">{name}</p>
       <p className="truncate text-xs text-white/40">{user}</p>
+      <div className={`mt-1 flex ${align === 'text-right' ? 'justify-end' : 'justify-start'}`}>
+        <Presence lastSeenAt={lastSeenAt} />
+      </div>
     </div>
   );
 }

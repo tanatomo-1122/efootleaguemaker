@@ -68,7 +68,8 @@ export async function POST(req) {
              m.home_team_name, m.away_team_name,
              he.user_id AS home_user_id, ae.user_id AS away_user_id,
              hu.user_name AS home_user_name, au.user_name AS away_user_name,
-             l.league_id, l.name AS league_name
+             hu.last_seen_at AS home_last_seen_at, au.last_seen_at AS away_last_seen_at,
+             l.league_id, l.name AS league_name, l.organizer_user_id
       FROM matches m
       JOIN leagues l ON l.league_id = m.league_id
       JOIN entries he ON he.entry_id = m.home_entry_id
@@ -98,6 +99,9 @@ export async function POST(req) {
         opponent_team: iAmHome ? m.away_team_name : m.home_team_name,
         side: iAmHome ? 'home' : 'away',
         has_room: m.has_room,
+        // 相手が反応していないかを判断できるよう最終アクセスを添える
+        opponent_last_seen_at: iAmHome ? m.away_last_seen_at : m.home_last_seen_at,
+        i_am_organizer: m.organizer_user_id === uid,
       };
 
       if (m.status === 'pending') {

@@ -8,6 +8,7 @@ import Bracket from '@/components/Bracket';
 import WithdrawButton from '@/components/WithdrawButton';
 import CancelLeagueButton from '@/components/CancelLeagueButton';
 import OrganizerPanel from '@/components/OrganizerPanel';
+import Presence from '@/components/Presence';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 20;
@@ -208,8 +209,12 @@ function Preparing({ league, entries, capacity }) {
               <Avatar src={e.user_photo} name={e.user_name} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-chalk">{e.team_name}</p>
-                <p className="truncate text-xs text-white/40">
-                  {e.user_name} ・ ⚔{e.attack_formation} 🛡{e.defence_formation} ・ {e.team_style}
+                <p className="flex items-center gap-2 truncate text-xs text-white/40">
+                  {e.user_name}
+                  <Presence lastSeenAt={e.last_seen_at} />
+                  <span className="truncate">
+                    ⚔{e.attack_formation} 🛡{e.defence_formation} ・ {e.team_style}
+                  </span>
                 </p>
               </div>
               <span className="font-mono text-sm text-volt">{e.team_power}</span>
@@ -283,9 +288,12 @@ function GroupTable({ pool }) {
                     <Avatar src={r.user_photo} name={r.user_name} size="h-8 w-8" />
                     <div className="min-w-0">
                       <p className="truncate font-bold text-chalk">{r.team_name}</p>
-                      <p className="truncate text-[11px] text-chalk/40">
-                        {r.user_name} ・ ⚔{r.attack_formation} 🛡{r.defence_formation} ・ TP{' '}
-                        {r.team_power}
+                      <p className="flex items-center gap-2 truncate text-[11px] text-chalk/40">
+                        {r.user_name}
+                        <Presence lastSeenAt={r.last_seen_at} />
+                        <span className="truncate">
+                          ⚔{r.attack_formation} 🛡{r.defence_formation} ・ TP {r.team_power}
+                        </span>
                       </p>
                     </div>
                   </div>

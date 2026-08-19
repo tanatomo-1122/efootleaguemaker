@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import UserIdInput, { loadRememberedUserId, rememberUserId } from './UserIdInput';
+import Presence from './Presence';
+import { presenceOf } from '@/lib/presence';
 
 const LEAGUE_STATUS = {
   recruiting: { text: '募集中', cls: 'bg-volt text-ink' },
@@ -125,10 +127,21 @@ export default function MyPage() {
                 <span className="text-xl">{ICONS[t.kind] ?? '・'}</span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-chalk">{t.text}</p>
-                  <p className="mt-1 truncate text-xs text-white/40">
-                    {t.league_name}
-                    {t.opponent && ` ・ グループ${t.pool} 第${t.round}節 ・ vs ${t.opponent}`}
+                  <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-white/40">
+                    <span className="truncate">
+                      {t.league_name}
+                      {t.opponent && ` ・ グループ${t.pool} 第${t.round}節 ・ vs ${t.opponent}`}
+                    </span>
+                    {t.opponent && <Presence lastSeenAt={t.opponent_last_seen_at} />}
                   </p>
+                  {t.opponent && isStale(t.opponent_last_seen_at) && (
+                    <p className="mt-1 text-xs text-amber-300">
+                      {t.opponent} さんは {presenceOf(t.opponent_last_seen_at).label} から来ていません。
+                      {t.i_am_organizer
+                        ? '主催者として代理で処理できます。'
+                        : '主催者に相談すると代理で処理してもらえます。'}
+                    </p>
+                  )}
                 </div>
                 <Link
                   href={t.match_id ? `/matches/${t.match_id}/report` : `/leagues/${t.league_id}`}
@@ -234,6 +247,10 @@ const ACTIONS = {
   finalize: '確定する',
   recruiting: '管理する',
 };
+
+function isStale(lastSeenAt) {
+  return presenceOf(lastSeenAt).state === 'stale' || presenceOf(lastSeenAt).state === 'never';
+}
 
 function StatusChip({ league }) {
   const st = league.cancelled

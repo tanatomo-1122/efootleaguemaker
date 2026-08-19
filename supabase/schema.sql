@@ -15,8 +15,12 @@ create table if not exists public.users (
   user_name         text        not null unique,
   efootball_user_id text        not null unique,
   photo_path        text,
+  -- 最終アクセス時刻。「連絡がつかない人」を見分けるために使う
+  last_seen_at      timestamptz,
   created_at        timestamptz not null default now()
 );
+
+create index if not exists idx_users_last_seen on public.users (last_seen_at desc nulls last);
 
 -- 形式チェック（大文字4文字 + 3桁×3）
 alter table public.users drop constraint if exists users_efootball_user_id_format;
@@ -100,6 +104,11 @@ create table if not exists public.matches (
   reported_at    timestamptz,
   approved_at    timestamptz,
   reject_note    text,
+
+  -- ---- 誰が登録/承認したか（主催者の代理操作を記録するため） ----
+  reported_by_user_id int references public.users(user_id),
+  approved_by_user_id int references public.users(user_id),
+  admin_note          text,
 
   -- ---- 対戦部屋（ホームが立てた部屋の番号。対戦する2人だけが見られる） ----
   room_code      text,
