@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { chatSnapshot, postMessage, MESSAGE_MAX } from '@/lib/league';
 import { AuthError, isValidUserId, normalizeUserId, USER_ID_PLACEHOLDER } from '@/lib/auth';
+import { readSessionUserId } from '@/lib/session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,9 +23,11 @@ export async function POST(req, { params }) {
     const payload = await req.json().catch(() => ({}));
     const action = payload.action === 'post' ? 'post' : 'list';
 
-    const userId = normalizeUserId(payload.efootball_user_id);
-    if (!String(payload.efootball_user_id ?? '').trim()) {
-      throw new AuthError('ユーザーIDを入力してください', 400);
+    // 明示指定が無ければログイン Cookie を使う
+    const rawId = String(payload.efootball_user_id ?? '').trim() || readSessionUserId() || '';
+    const userId = normalizeUserId(rawId);
+    if (!rawId) {
+      throw new AuthError('ログインしていません。ユーザーIDを入力してください', 401);
     }
     if (!isValidUserId(userId)) {
       throw new AuthError(

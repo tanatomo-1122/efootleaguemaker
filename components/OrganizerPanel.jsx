@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import IdentityGate from './IdentityGate';
+import { useSession } from './SessionProvider';
 
 /**
  * 募集中のリーグに対する主催者メニュー。
@@ -13,8 +14,8 @@ export default function OrganizerPanel({
   leagueId, organizerUserName, entryCount, playersPerPool, poolCount,
 }) {
   const router = useRouter();
+  const { user } = useSession();
   const [open, setOpen] = useState(false);
-  const [userId, setUserId] = useState('');
   const [players, setPlayers] = useState(playersPerPool);
   const [pools, setPools] = useState(poolCount);
   const [busy, setBusy] = useState(null); // 'start' | 'resize'
@@ -38,7 +39,6 @@ export default function OrganizerPanel({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          efootball_user_id: userId,
           action,
           players_per_pool: Number(players),
           pool_count: Number(pools),
@@ -46,7 +46,6 @@ export default function OrganizerPanel({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '操作に失敗しました');
-      rememberUserId(userId);
 
       if (action === 'start') {
         setMessage(
@@ -88,10 +87,8 @@ export default function OrganizerPanel({
         </button>
       </div>
 
-      <UserIdInput
-        value={userId}
-        onChange={setUserId}
-        label="主催者のユーザーID"
+      <IdentityGate
+        expectedUserName={organizerUserName}
         hint={`操作できるのは主催者の ${organizerUserName ?? '（未設定）'} さんだけです。`}
       />
 
@@ -109,7 +106,7 @@ export default function OrganizerPanel({
         <button
           type="button"
           onClick={() => run('start')}
-          disabled={busy !== null || !userId || !canStart}
+          disabled={busy !== null || !user || !canStart}
           className="btn-volt mt-4 w-full !py-3 text-sm"
         >
           {busy === 'start' ? '開始中…' : `${entryCount}人でリーグを始める`}
@@ -157,7 +154,7 @@ export default function OrganizerPanel({
         <button
           type="button"
           onClick={() => run('resize')}
-          disabled={busy !== null || !userId || capacity < entryCount}
+          disabled={busy !== null || !user || capacity < entryCount}
           className="btn-ghost mt-4 w-full !py-3 text-xs"
         >
           {busy === 'resize' ? '変更中…' : '募集人数を変更する'}

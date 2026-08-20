@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PhotoInput from './PhotoInput';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import IdentityGate from './IdentityGate';
+import { useSession } from './SessionProvider';
 import { STAT_KEYS } from '@/lib/schema';
 
 /** ホーム側が結果を登録するフォーム（登録後はアウェイの承認待ちになる） */
@@ -12,7 +13,7 @@ export default function ReportForm({
   initialStats, hasResult, existingImage,
 }) {
   const router = useRouter();
-  const [userId, setUserId] = useState('');
+  const { user } = useSession();
   const [file, setFile] = useState(null);
   const [stats, setStats] = useState(initialStats);
   const [imagePath, setImagePath] = useState(existingImage || null);
@@ -69,7 +70,6 @@ export default function ReportForm({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          efootball_user_id: userId,
           stats,
           image_path: imagePath,
           source: analysis?.matched ? 'auto' : 'manual',
@@ -77,7 +77,6 @@ export default function ReportForm({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '保存に失敗しました');
-      rememberUserId(userId);
       setSent(true);
       setTimeout(() => {
         router.push(`/leagues/${leagueId}`);
@@ -106,10 +105,8 @@ export default function ReportForm({
       {/* ---------- 本人確認 ---------- */}
       <section className="card p-6">
         <p className="label mb-4">Step 1 / 本人確認</p>
-        <UserIdInput
-          value={userId}
-          onChange={setUserId}
-          label="あなたのユーザーID"
+        <IdentityGate
+          expectedUserName={homeUserName}
           hint={`結果を登録できるのはホーム側の ${homeUserName} さんです。`}
         />
       </section>
@@ -215,7 +212,7 @@ export default function ReportForm({
             </div>
           )}
 
-          <button onClick={save} disabled={busy || !userId} className="btn-volt mt-7 w-full">
+          <button onClick={save} disabled={busy || !user} className="btn-volt mt-7 w-full">
             {busy ? '送信中…' : 'この内容でアウェイに承認を依頼する'}
           </button>
           <p className="mt-3 text-center text-xs text-white/35">

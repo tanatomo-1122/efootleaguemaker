@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import IdentityGate from './IdentityGate';
+import { useSession } from './SessionProvider';
 
 /** 参加取り消し（組み合わせ抽選の前だけ） */
 export default function WithdrawButton({ leagueId }) {
   const router = useRouter();
+  const { user } = useSession();
   const [open, setOpen] = useState(false);
-  const [userId, setUserId] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [done, setDone] = useState(null);
@@ -21,11 +22,10 @@ export default function WithdrawButton({ leagueId }) {
       const res = await fetch(`/api/leagues/${leagueId}/entries`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ efootball_user_id: userId }),
+        body: JSON.stringify({}),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '取り消しに失敗しました');
-      rememberUserId(userId);
       setDone(data.team_name);
       setTimeout(() => router.refresh(), 1200);
     } catch (e) {
@@ -58,18 +58,13 @@ export default function WithdrawButton({ leagueId }) {
   return (
     <div className="card mx-auto mt-8 max-w-md p-6 text-left">
       <p className="label mb-4">参加取り消し</p>
-      <UserIdInput
-        value={userId}
-        onChange={setUserId}
-        label="あなたのユーザーID"
-        hint="本人確認のため入力してください。登録したスカッドも一緒に削除されます。"
-      />
+      <IdentityGate hint="登録したスカッドも一緒に削除されます。" />
       {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
       <div className="mt-5 flex gap-3">
         <button
           type="button"
           onClick={withdraw}
-          disabled={busy || !userId}
+          disabled={busy || !user}
           className="btn-ghost flex-1 !border-amber-400/50 !text-amber-300"
         >
           {busy ? '処理中…' : '取り消す'}

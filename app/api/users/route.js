@@ -4,6 +4,14 @@ import { saveUpload } from '@/lib/storage';
 import {
   normalizeUserId, isValidUserId, normalizeUserName, isValidUserName, USER_ID_PLACEHOLDER,
 } from '@/lib/user-id';
+import { SESSION_COOKIE, sessionCookieOptions } from '@/lib/session';
+
+/** 登録が済んだらそのままログイン状態にする */
+function withSession(payload, efootballUserId) {
+  const res = NextResponse.json(payload);
+  res.cookies.set(SESSION_COOKIE, efootballUserId, sessionCookieOptions());
+  return res;
+}
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -45,10 +53,13 @@ export async function POST(req) {
 
     // 同じ組み合わせでの再登録は「ログイン」として扱う
     if (byId && byName && byId.user_id === byName.user_id) {
-      return NextResponse.json({
-        user: { user_id: byId.user_id, user_name: byId.user_name, photo_path: byId.photo_path },
-        existing: true,
-      });
+      return withSession(
+        {
+          user: { user_id: byId.user_id, user_name: byId.user_name, photo_path: byId.photo_path },
+          existing: true,
+        },
+        efootballUserId
+      );
     }
     if (byName) {
       return NextResponse.json(
@@ -69,7 +80,7 @@ export async function POST(req) {
       VALUES (${userName}, ${efootballUserId}, ${photoPath})
       RETURNING user_id, user_name, photo_path
     `;
-    return NextResponse.json({ user, existing: false });
+    return withSession({ user, existing: false }, efootballUserId);
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

@@ -3,14 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PhotoInput from './PhotoInput';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import IdentityGate from './IdentityGate';
+import { useSession } from './SessionProvider';
 import FormationInput from './FormationInput';
 import { FORMATIONS, TEAM_STYLES } from '@/lib/schema';
 import { parseFormation } from '@/lib/formation';
 
 export default function JoinForm({ leagueId, remaining }) {
   const router = useRouter();
-  const [userId, setUserId] = useState('');
+  const { user } = useSession();
   const [form, setForm] = useState({
     team_name: '',
     attack_formation: '',
@@ -47,14 +48,12 @@ export default function JoinForm({ leagueId, remaining }) {
     try {
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-      fd.append('efootball_user_id', userId);
       if (photo) fd.append('squad_photo', photo);
 
       const res = await fetch(`/api/leagues/${leagueId}/entries`, { method: 'POST', body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '申し込みに失敗しました');
 
-      rememberUserId(userId);
 
       if (data.drawn) {
         setDrawn(true);
@@ -83,17 +82,7 @@ export default function JoinForm({ leagueId, remaining }) {
   return (
     <form onSubmit={submit} className="mt-8 space-y-6">
       <Section n="01" title="出場選手（あなた）">
-        <UserIdInput
-          value={userId}
-          onChange={setUserId}
-          label="あなたのユーザーID"
-          required
-          hint="登録済みのユーザーIDで本人確認します。リーグ表には表示されません。"
-        />
-        <p className="mt-2 text-xs text-white/35">
-          未登録の方は先に{' '}
-          <a href="/register" className="text-volt underline">ユーザー登録</a> をどうぞ。
-        </p>
+        <IdentityGate hint="ログインしている本人として申し込みます。" />
       </Section>
 
       <Section n="02" title="スカッド情報">

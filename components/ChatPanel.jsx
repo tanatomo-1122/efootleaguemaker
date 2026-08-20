@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import IdentityGate from './IdentityGate';
+import { useSession } from './SessionProvider';
 
 const POLL_MS = 10000;
 // 動きが無いまま放置されたタブが延々と叩き続けないよう、15分で止める
@@ -20,11 +21,11 @@ const PRESETS = [
 
 /**
  * 対戦相手とのトーク。
- * 中身は最初は空で、ユーザーIDを入れて解錠したときだけ取りに行く。
- * 解錠後は5秒ごとに新着だけを拾う（画面が見えている間だけ）。
+ * 中身は最初は空で、開いたときだけ取りに行く。
+ * その後は10秒ごとに新着だけを拾う（画面が見えている間だけ）。
  */
 export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
-  const [userId, setUserId] = useState('');
+  const { user } = useSession();
   const [unlocked, setUnlocked] = useState(false);
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState('');
@@ -35,7 +36,6 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
 
   const [paused, setPaused] = useState(false);
   const lastIdRef = useRef(0);
-  const idRef = useRef('');
   const bottomRef = useRef(null);
   const lastActivityRef = useRef(Date.now());
 
@@ -44,7 +44,6 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        efootball_user_id: idRef.current,
         action,
         body,
         after_id: incremental ? lastIdRef.current : 0,
@@ -73,9 +72,7 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
     setBusy(true);
     setError(null);
     try {
-      idRef.current = userId;
       await fetchMessages();
-      rememberUserId(userId);
       setUnlocked(true);
     } catch (e) {
       setError(e.message);
@@ -159,16 +156,11 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
 
       {!unlocked ? (
         <div className="mt-5 space-y-4">
-          <UserIdInput
-            value={userId}
-            onChange={setUserId}
-            label="あなたのユーザーID"
-            hint="この試合の対戦者だけがトークを開けます。"
-          />
+          <IdentityGate hint="この試合の対戦者だけがトークを開けます。" />
           <button
             type="button"
             onClick={unlock}
-            disabled={busy || !userId}
+            disabled={busy || !user}
             className="btn-volt w-full !py-3 text-sm"
           >
             {busy ? '確認中…' : 'トークを開く'}

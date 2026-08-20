@@ -1,12 +1,18 @@
 import './globals.css';
 import Link from 'next/link';
+import SessionProvider from '@/components/SessionProvider';
+import SessionBadge from '@/components/SessionBadge';
+import { getSessionUser } from '@/lib/session';
 
 export const metadata = {
   title: 'efootleaguemaker',
   description: 'eFootball のリーグ戦を作って、遊んで、データを残す。',
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Cookie から「誰としてログインしているか」を取り出して全画面へ配る
+  const user = await getSessionUser();
+
   return (
     <html lang="ja">
       <head>
@@ -18,9 +24,11 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="font-sans">
-        <Header />
-        <main className="min-h-[70vh]">{children}</main>
-        <Footer />
+        <SessionProvider initialUser={user}>
+          <Header />
+          <main className="min-h-[70vh]">{children}</main>
+          <Footer />
+        </SessionProvider>
       </body>
     </html>
   );
@@ -29,17 +37,18 @@ export default function RootLayout({ children }) {
 function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-ink/85 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-        <Link href="/" className="headline text-xl text-chalk">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4">
+        <Link href="/" className="headline shrink-0 text-xl text-chalk">
           efoot<span className="text-volt">league</span>maker
         </Link>
-        <nav className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest sm:gap-4 sm:text-xs">
-          <Link href="/leagues" className="px-2 py-1 text-white/60 hover:text-volt">募集中</Link>
-          <Link href="/register" className="px-2 py-1 text-white/60 hover:text-volt">登録</Link>
-          <Link href="/leagues/new" className="px-2 py-1 text-white/60 hover:text-volt">主催</Link>
-          <Link href="/data" className="px-2 py-1 text-white/60 hover:text-volt">データ</Link>
-          <Link href="/me" className="px-2 py-1 text-volt hover:brightness-125">マイページ</Link>
-        </nav>
+        <div className="flex items-center gap-1 sm:gap-3">
+          <nav className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest sm:gap-3 sm:text-xs">
+            <Link href="/leagues" className="px-2 py-1 text-white/60 hover:text-volt">募集中</Link>
+            <Link href="/leagues/new" className="px-2 py-1 text-white/60 hover:text-volt">主催</Link>
+            <Link href="/data" className="px-2 py-1 text-white/60 hover:text-volt">データ</Link>
+          </nav>
+          <SessionBadge />
+        </div>
       </div>
     </header>
   );

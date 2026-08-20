@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import IdentityGate from './IdentityGate';
+import { useSession } from './SessionProvider';
 
 /** リーグの確定。主催者だけが実行できる（ユーザーIDで本人確認） */
 export default function FinalizeButton({ leagueId, enabled, remaining, organizerUserName }) {
   const router = useRouter();
-  const [userId, setUserId] = useState('');
+  const { user } = useSession();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
@@ -19,11 +20,10 @@ export default function FinalizeButton({ leagueId, enabled, remaining, organizer
       const res = await fetch(`/api/leagues/${leagueId}/finalize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ efootball_user_id: userId }),
+        body: JSON.stringify({}),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '確定に失敗しました');
-      rememberUserId(userId);
       router.refresh();
     } catch (e) {
       setError(e.message);
@@ -35,15 +35,13 @@ export default function FinalizeButton({ leagueId, enabled, remaining, organizer
   return (
     <div className="mx-auto max-w-md text-left">
       <p className="wc-head mb-3 text-center">主催者メニュー</p>
-      <UserIdInput
-        value={userId}
-        onChange={setUserId}
-        label="主催者のユーザーID"
+      <IdentityGate
+        expectedUserName={organizerUserName}
         hint={`確定できるのは主催者の ${organizerUserName ?? '（未設定）'} さんだけです。`}
       />
       <button
         onClick={finalize}
-        disabled={!enabled || busy || !userId}
+        disabled={!enabled || busy || !user}
         className="btn-volt mt-4 w-full !bg-gold"
       >
         {busy ? '処理中…' : '結果を確定してリーグを終了'}

@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PhotoInput from './PhotoInput';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import UserIdInput from './UserIdInput';
+import { useSession } from './SessionProvider';
 import { USER_ID_PLACEHOLDER } from '@/lib/user-id';
 
 export default function RegisterForm() {
   const router = useRouter();
+  const { setUser } = useSession();
   const [userName, setUserName] = useState('');
   const [userId, setUserId] = useState('');
   const [photo, setPhoto] = useState(null);
@@ -28,15 +30,16 @@ export default function RegisterForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '登録に失敗しました');
 
-      // 次回以降の入力を省くため、この端末にだけ記憶しておく
-      rememberUserId(userId);
-      try { localStorage.setItem('user_name', data.user.user_name); } catch {}
+      // 登録した時点でログイン状態になる（Cookie はサーバーが発行済み）
+      setUser(data.user);
 
       setMsg({
         type: 'ok',
-        text: data.existing ? 'すでに登録済みでした。そのまま参加できます。' : '登録が完了しました。',
+        text: data.existing
+          ? `おかえりなさい、${data.user.user_name} さん。ログインしました。`
+          : `登録が完了しました。以降このブラウザではIDの入力は不要です。`,
       });
-      setTimeout(() => router.push('/leagues'), 900);
+      setTimeout(() => { router.push('/me'); router.refresh(); }, 1000);
     } catch (err) {
       setMsg({ type: 'error', text: err.message });
     } finally {

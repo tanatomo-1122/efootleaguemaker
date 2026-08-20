@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import UserIdInput, { loadRememberedUserId, rememberUserId } from './UserIdInput';
+import UserIdInput from './UserIdInput';
+import { useSession } from './SessionProvider';
 import Presence from './Presence';
 import { presenceOf } from '@/lib/presence';
 
@@ -13,23 +14,25 @@ const LEAGUE_STATUS = {
 };
 
 export default function MyPage() {
+  const { user: sessionUser, login } = useSession();
   const [userId, setUserId] = useState('');
   const [data, setData] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
-  async function load(id = userId) {
+  async function load(id) {
     setBusy(true);
     setError(null);
     try {
+      // id を渡さなければログイン Cookie で本人が特定される
+      if (id) await login(id);
       const res = await fetch('/api/me', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ efootball_user_id: id }),
+        body: JSON.stringify({}),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || '読み込みに失敗しました');
-      rememberUserId(id);
       setData(json);
     } catch (e) {
       setError(e.message);
@@ -39,15 +42,27 @@ export default function MyPage() {
     }
   }
 
-  // 前回のIDが残っていれば、そのまま開く
+  // ログイン済みならそのまま開く
   useEffect(() => {
-    const saved = loadRememberedUserId();
-    if (saved) {
-      setUserId(saved);
-      load(saved);
-    }
+    if (sessionUser && !data) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [sessionUser]);
+
+  // ログイン済みなら、読み込みが終わるまでログインフォームを見せない
+  if (!data && sessionUser) {
+    return (
+      <div className="card mt-10 p-10 text-center">
+        <p className="text-sm text-white/45">
+          {error ?? `${sessionUser.user_name} さんの状況を読み込んでいます…`}
+        </p>
+        {error && (
+          <button onClick={() => load()} className="btn-ghost mt-5 !px-5 !py-2 text-xs">
+            もう一度読み込む
+          </button>
+        )}
+      </div>
+    );
+  }
 
   if (!data) {
     return (
@@ -60,11 +75,11 @@ export default function MyPage() {
         />
         {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
         <button
-          onClick={() => load()}
+          onClick={() => load(userId)}
           disabled={busy || !userId}
           className="btn-volt mt-5 w-full"
         >
-          {busy ? '読み込み中…' : 'マイページを開く'}
+          {busy ? '読み込み中…' : 'ログインしてマイページを開く'}
         </button>
         <p className="mt-4 text-xs text-white/35">
           未登録の方は <Link href="/register" className="text-volt underline">ユーザー登録</Link> から。

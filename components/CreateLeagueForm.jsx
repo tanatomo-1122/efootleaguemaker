@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import IdentityGate from './IdentityGate';
+import { useSession } from './SessionProvider';
 
 export default function CreateLeagueForm() {
   const router = useRouter();
-  const [userId, setUserId] = useState('');
+  const { user } = useSession();
   const [form, setForm] = useState({
     name: '',
     players_per_pool: 4,
@@ -34,14 +35,12 @@ export default function CreateLeagueForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          efootball_user_id: userId,
           players_per_pool: Number(form.players_per_pool),
           pool_count: Number(form.pool_count),
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '作成に失敗しました');
-      rememberUserId(userId);
       router.push(`/leagues/${data.league.league_id}`);
     } catch (err) {
       setError(err.message);
@@ -56,17 +55,7 @@ export default function CreateLeagueForm() {
       </Field>
 
       <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-        <UserIdInput
-          value={userId}
-          onChange={setUserId}
-          label="主催者（あなた）のユーザーID"
-          required
-          hint="このIDのユーザーが主催者になります。リーグの結果を確定できるのは主催者だけです。"
-        />
-        <p className="mt-2 text-xs text-white/35">
-          未登録の場合は先に{' '}
-          <a href="/register" className="text-volt underline">ユーザー登録</a> をどうぞ。
-        </p>
+        <IdentityGate hint="ログインしている人が主催者になります。結果を確定できるのは主催者だけです。" />
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import IdentityGate from './IdentityGate';
+import { useSession } from './SessionProvider';
 import { STAT_KEYS } from '@/lib/schema';
 
 /** アウェイ側が、ホームの登録した結果を承認 / 差し戻しするパネル */
@@ -11,7 +12,7 @@ export default function ApprovePanel({
   stats, imagePath, reportedAt,
 }) {
   const router = useRouter();
-  const [userId, setUserId] = useState('');
+  const { user } = useSession();
   const [note, setNote] = useState('');
   const [showReject, setShowReject] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -25,11 +26,10 @@ export default function ApprovePanel({
       const res = await fetch(`/api/matches/${matchId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ efootball_user_id: userId, action, note }),
+        body: JSON.stringify({ action, note }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '処理に失敗しました');
-      rememberUserId(userId);
       setDone(action === 'reject' ? 'rejected' : 'approved');
       setTimeout(() => {
         router.push(`/leagues/${leagueId}`);
@@ -108,10 +108,8 @@ export default function ApprovePanel({
 
       {/* 承認 */}
       <section className="card p-6">
-        <UserIdInput
-          value={userId}
-          onChange={setUserId}
-          label="あなたのユーザーID"
+        <IdentityGate
+          expectedUserName={awayUserName}
           hint={`承認できるのはアウェイ側の ${awayUserName} さんです。`}
         />
 
@@ -119,7 +117,7 @@ export default function ApprovePanel({
 
         <button
           onClick={() => send('approve')}
-          disabled={busy || !userId}
+          disabled={busy || !user}
           className="btn-volt mt-6 w-full"
         >
           {busy ? '送信中…' : 'この結果を承認する'}
@@ -145,7 +143,7 @@ export default function ApprovePanel({
             <button
               type="button"
               onClick={() => send('reject')}
-              disabled={busy || !userId}
+              disabled={busy || !user}
               className="btn-ghost mt-4 w-full !border-amber-400/50 !text-amber-300"
             >
               差し戻してホームに再登録を依頼する

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import IdentityGate from './IdentityGate';
+import { useSession } from './SessionProvider';
 import { STAT_KEYS } from '@/lib/schema';
 
 /**
@@ -16,8 +17,8 @@ export default function OrganizerMatchPanel({
   homeUserName, awayUserName, matchStatus, initialStats,
 }) {
   const router = useRouter();
+  const { user } = useSession();
   const [open, setOpen] = useState(false);
-  const [userId, setUserId] = useState('');
   const [home, setHome] = useState(initialStats?.home_score ?? '');
   const [away, setAway] = useState(initialStats?.away_score ?? '');
   const [note, setNote] = useState('');
@@ -40,11 +41,10 @@ export default function OrganizerMatchPanel({
       const res = await fetch(`/api/matches/${matchId}/organizer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ efootball_user_id: userId, action, stats, note }),
+        body: JSON.stringify({ action, stats, note }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '操作に失敗しました');
-      rememberUserId(userId);
       setMessage(
         action === 'reset'
           ? '結果を取り消しました。未消化に戻っています。'
@@ -90,10 +90,8 @@ export default function OrganizerMatchPanel({
         <span className="text-amber-300">誰が代理で処理したかは記録され、試合ページに表示されます。</span>
       </p>
 
-      <UserIdInput
-        value={userId}
-        onChange={setUserId}
-        label="主催者のユーザーID"
+      <IdentityGate
+        expectedUserName={organizerUserName}
         hint={`代理で操作できるのは主催者の ${organizerUserName ?? '（未設定）'} さんだけです。`}
       />
 
@@ -111,7 +109,7 @@ export default function OrganizerMatchPanel({
           <button
             type="button"
             onClick={() => run('approve')}
-            disabled={busy !== null || !userId}
+            disabled={busy !== null || !user}
             className="btn-volt mt-4 w-full !py-3 text-sm"
           >
             {busy === 'approve' ? '処理中…' : `${awayUserName} さんの代わりに承認する`}
@@ -130,7 +128,7 @@ export default function OrganizerMatchPanel({
             <button
               type="button"
               onClick={() => settle(3, 0, `${homeUserName} の不戦勝`)}
-              disabled={busy !== null || !userId}
+              disabled={busy !== null || !user}
               className="btn-ghost !py-3 text-xs"
             >
               {homeName} の勝ち（3-0）
@@ -138,7 +136,7 @@ export default function OrganizerMatchPanel({
             <button
               type="button"
               onClick={() => settle(0, 3, `${awayUserName} の不戦勝`)}
-              disabled={busy !== null || !userId}
+              disabled={busy !== null || !user}
               className="btn-ghost !py-3 text-xs"
             >
               {awayName} の勝ち（0-3）
@@ -147,7 +145,7 @@ export default function OrganizerMatchPanel({
           <button
             type="button"
             onClick={() => settle(0, 0, '両者不参加のため引き分け扱い')}
-            disabled={busy !== null || !userId}
+            disabled={busy !== null || !user}
             className="mt-3 w-full text-center text-xs text-white/35 underline hover:text-volt"
           >
             両者不参加として 0-0 で処理する
@@ -185,7 +183,7 @@ export default function OrganizerMatchPanel({
         <button
           type="button"
           onClick={() => settle(home, away)}
-          disabled={busy !== null || !userId || home === '' || away === ''}
+          disabled={busy !== null || !user || home === '' || away === ''}
           className="btn-volt mt-4 w-full !py-3 text-sm"
         >
           {busy === 'settle' ? '確定中…' : 'このスコアで確定する'}
@@ -209,7 +207,7 @@ export default function OrganizerMatchPanel({
         <button
           type="button"
           onClick={() => run('reset')}
-          disabled={busy !== null || !userId}
+          disabled={busy !== null || !user}
           className="mt-5 w-full text-center text-xs text-amber-300/70 underline hover:text-amber-300"
         >
           {busy === 'reset' ? '処理中…' : 'この結果を取り消して未消化に戻す'}

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import IdentityGate from './IdentityGate';
+import { useSession } from './SessionProvider';
 
 /**
  * 対戦部屋の受け渡し。
@@ -15,8 +16,8 @@ export default function RoomPanel({
   matchId, homeUserName, awayUserName, hasRoom, roomPostedAt,
 }) {
   const router = useRouter();
+  const { user } = useSession();
   const [mode, setMode] = useState(null); // null | 'post' | 'reveal'
-  const [userId, setUserId] = useState('');
   const [code, setCode] = useState('');
   const [note, setNote] = useState('');
   const [revealed, setRevealed] = useState(null);
@@ -33,7 +34,6 @@ export default function RoomPanel({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          efootball_user_id: userId,
           room_code: code,
           room_note: note,
           action,
@@ -41,7 +41,6 @@ export default function RoomPanel({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '共有に失敗しました');
-      rememberUserId(userId);
       setMode(null);
       setCode('');
       setNote('');
@@ -65,11 +64,10 @@ export default function RoomPanel({
       const res = await fetch(`/api/matches/${matchId}/room/reveal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ efootball_user_id: userId }),
+        body: JSON.stringify({}),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '確認に失敗しました');
-      rememberUserId(userId);
       setRevealed(data);
     } catch (e) {
       setError(e.message);
@@ -98,7 +96,7 @@ export default function RoomPanel({
       <p className="mt-3 text-sm leading-relaxed text-white/55">
         ホームの <span className="text-chalk">{homeUserName}</span> さんが eFootball で部屋を立てて、
         番号をここに貼ります。アウェイの <span className="text-chalk">{awayUserName}</span> さんは、
-        自分のユーザーIDを入れると番号を確認できます。
+        「部屋番号を確認する」を押すと番号が出ます。
       </p>
 
       {message && <p className="mt-4 text-sm text-volt">{message}</p>}
@@ -153,17 +151,12 @@ export default function RoomPanel({
 
       {mode === 'reveal' && (
         <div className="mt-5 space-y-4">
-          <UserIdInput
-            value={userId}
-            onChange={setUserId}
-            label="あなたのユーザーID"
-            hint="この試合の対戦者だけが確認できます。"
-          />
+          <IdentityGate hint="この試合の対戦者だけが確認できます。" />
           <div className="flex gap-3">
             <button
               type="button"
               onClick={reveal}
-              disabled={busy || !userId}
+              disabled={busy || !user}
               className="btn-volt flex-1 !py-3 text-sm"
             >
               {busy ? '確認中…' : '確認する'}
@@ -177,10 +170,8 @@ export default function RoomPanel({
 
       {mode === 'post' && (
         <div className="mt-5 space-y-4">
-          <UserIdInput
-            value={userId}
-            onChange={setUserId}
-            label="ホームのユーザーID"
+          <IdentityGate
+            expectedUserName={homeUserName}
             hint={`部屋番号を貼れるのはホームの ${homeUserName} さんだけです。`}
           />
           <label className="block">
@@ -208,7 +199,7 @@ export default function RoomPanel({
             <button
               type="button"
               onClick={() => post('post')}
-              disabled={busy || !userId || !code.trim()}
+              disabled={busy || !user || !code.trim()}
               className="btn-volt flex-1 !py-3 text-sm"
             >
               {busy ? '送信中…' : '共有する'}
@@ -217,7 +208,7 @@ export default function RoomPanel({
               <button
                 type="button"
                 onClick={() => post('clear')}
-                disabled={busy || !userId}
+                disabled={busy || !user}
                 className="btn-ghost !px-5 !py-3 text-xs !border-amber-400/50 !text-amber-300"
               >
                 取り消す

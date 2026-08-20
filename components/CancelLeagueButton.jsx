@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import UserIdInput, { rememberUserId } from './UserIdInput';
+import IdentityGate from './IdentityGate';
+import { useSession } from './SessionProvider';
 
 /** リーグの中止 / 再開（主催者のみ） */
 export default function CancelLeagueButton({ leagueId, organizerUserName, cancelled }) {
   const router = useRouter();
+  const { user } = useSession();
   const [open, setOpen] = useState(false);
-  const [userId, setUserId] = useState('');
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -27,11 +28,10 @@ export default function CancelLeagueButton({ leagueId, organizerUserName, cancel
       const res = await fetch(`/api/leagues/${leagueId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ efootball_user_id: userId, action, reason }),
+        body: JSON.stringify({ action, reason }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `${actionLabel}に失敗しました`);
-      rememberUserId(userId);
       setOpen(false);
       router.refresh();
     } catch (e) {
@@ -58,10 +58,8 @@ export default function CancelLeagueButton({ leagueId, organizerUserName, cancel
   return (
     <div className="card mx-auto mt-6 max-w-md p-6 text-left">
       <p className="label mb-4">リーグの{actionLabel}</p>
-      <UserIdInput
-        value={userId}
-        onChange={setUserId}
-        label="主催者のユーザーID"
+      <IdentityGate
+        expectedUserName={organizerUserName}
         hint={`${actionLabel}できるのは主催者の ${organizerUserName ?? '（未設定）'} さんだけです。`}
       />
 
@@ -87,7 +85,7 @@ export default function CancelLeagueButton({ leagueId, organizerUserName, cancel
         <button
           type="button"
           onClick={run}
-          disabled={busy || !userId}
+          disabled={busy || !user}
           className={`btn-ghost flex-1 ${
             cancelled ? '!border-volt/50 !text-volt' : '!border-amber-400/50 !text-amber-300'
           }`}
