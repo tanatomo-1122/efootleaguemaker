@@ -41,7 +41,12 @@ export async function POST(req, { params }) {
 
     imagePath = await saveUpload(file, `match${matchId}`);
     const { base64, mediaType } = await fileToBase64(file);
-    const parsed = await extractMatchStats(base64, mediaType);
+    // 登録済みのスカッド名を候補として渡す。
+    // 日本語（特にひらがな1文字）のチーム名はモデルが読み違えやすいので、
+    // 「この2つのどちらか」と教えておくと照合の成功率が上がる。
+    const parsed = await extractMatchStats(base64, mediaType, {
+      teamHints: [match.home_team_name, match.away_team_name],
+    });
 
     // --- 登録スカッド名との自動照合 ---
     const direction = matchSquadNames(match, parsed.home_team_name, parsed.away_team_name);
