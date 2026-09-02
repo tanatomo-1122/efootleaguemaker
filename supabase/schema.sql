@@ -17,8 +17,13 @@ create table if not exists public.users (
   photo_path        text,
   -- 最終アクセス時刻。「連絡がつかない人」を見分けるために使う
   last_seen_at      timestamptz,
+  -- EFLランク（レーティング）。初期値は一律 1500
+  rating            double precision not null default 1500,
+  rating_matches    int              not null default 0,
   created_at        timestamptz not null default now()
 );
+
+create index if not exists idx_users_rating on public.users (rating desc);
 
 create index if not exists idx_users_last_seen on public.users (last_seen_at desc nulls last);
 
@@ -46,6 +51,9 @@ create table if not exists public.leagues (
   status            text not null default 'recruiting',
   cancelled_at      timestamptz,
   cancel_reason     text,
+  -- EFLランクの重要度 I を決める。general=10 / prize=25 / official=40
+  category          text not null default 'general'
+                      check (category in ('general', 'prize', 'official')),
   created_at        timestamptz not null default now()
 );
 
@@ -147,6 +155,29 @@ create table if not exists public.match_messages (
 
 create index if not exists idx_match_messages on public.match_messages (match_id, message_id);
 
+-- ---------------------------------------------------------------
+-- rating_events（EFLランクの変動履歴）
+--   1試合につき2行（ホーム視点・アウェイ視点）。
+--   (match_id, user_id) を一意にして二重加算を防ぐ。
+-- ---------------------------------------------------------------
+create table if not exists public.rating_events (
+  event_id      int generated always as identity primary key,
+  match_id      int  not null references public.matches(match_id) on delete cascade,
+  user_id       int  not null references public.users(user_id),
+  opponent_id   int  not null references public.users(user_id),
+  league_id     int  references public.leagues(league_id) on delete set null,
+  importance    int  not null,
+  result        double precision not null,   -- W: 1 / 0.5 / 0
+  expected      double precision not null,   -- We
+  rating_before double precision not null,
+  rating_after  double precision not null,
+  delta         double precision not null,
+  created_at    timestamptz not null default now(),
+  unique (match_id, user_id)
+);
+
+create index if not exists idx_rating_events_user on public.rating_events (user_id, event_id desc);
+
 create index if not exists idx_entries_league on public.entries (league_id);
 create index if not exists idx_matches_league on public.matches (league_id, pool_index, round);
 create index if not exists idx_matches_status on public.matches (status);
@@ -164,6 +195,7 @@ alter table public.squads         enable row level security;
 alter table public.entries        enable row level security;
 alter table public.matches        enable row level security;
 alter table public.match_messages enable row level security;
+alter table public.rating_events  enable row level security;
 
 -- =====================================================================
 -- Storage

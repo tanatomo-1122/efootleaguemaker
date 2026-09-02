@@ -44,6 +44,7 @@ function Header() {
         <div className="flex items-center gap-1 sm:gap-3">
           <nav className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest sm:gap-3 sm:text-xs">
             <Link href="/leagues" className="px-2 py-1 text-white/60 hover:text-volt">募集中</Link>
+            <Link href="/rank" className="px-2 py-1 text-gold hover:brightness-125">EFLランク</Link>
             <Link href="/leagues/new" className="px-2 py-1 text-white/60 hover:text-volt">主催</Link>
             <Link href="/data" className="px-2 py-1 text-white/60 hover:text-volt">データ</Link>
           </nav>

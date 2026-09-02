@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { listLeagues, listEntries } from '@/lib/league';
+import { CATEGORIES } from '@/lib/rank';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 20;
@@ -68,9 +69,16 @@ async function LeagueCard({ league }) {
     <article className="card slash-bg group relative overflow-hidden p-7 transition hover:border-volt/50">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <span className={`inline-block rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${st.cls}`}>
-            {st.text}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`inline-block rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${st.cls}`}>
+              {st.text}
+            </span>
+            {league.category && league.category !== 'general' && (
+              <span className="inline-block rounded-full bg-gold px-3 py-1 text-[10px] font-black tracking-widest text-pitchdark">
+                {CATEGORIES[league.category]?.short ?? league.category}
+              </span>
+            )}
+          </div>
           <h2 className="headline mt-4 truncate text-3xl text-chalk">{league.name}</h2>
           {league.organizer_user_name && (
             <p className="mt-1 truncate text-xs text-white/35">

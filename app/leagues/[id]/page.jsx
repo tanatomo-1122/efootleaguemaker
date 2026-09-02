@@ -9,6 +9,7 @@ import WithdrawButton from '@/components/WithdrawButton';
 import CancelLeagueButton from '@/components/CancelLeagueButton';
 import OrganizerPanel from '@/components/OrganizerPanel';
 import Presence from '@/components/Presence';
+import { CATEGORIES } from '@/lib/rank';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 20;
@@ -50,6 +51,7 @@ export default async function LeaguePage({ params }) {
             <Badge>{league.cancelled ? '中止' : finished ? '確定済み' : '開催中'}</Badge>
             <Badge>{league.pool_count} プール × {league.players_per_pool} 人</Badge>
             {league.organizer_user_name && <Badge>主催 {league.organizer_user_name}</Badge>}
+            <Badge>{CATEGORIES[league.category]?.label ?? '一般リーグ'}（I = {CATEGORIES[league.category]?.importance ?? 10}）</Badge>
             <Badge>承認済み {done} / {matches.length} 試合</Badge>
             {pending > 0 && (
               <span className="rounded-full bg-amber-400 px-4 py-1.5 text-[11px] font-black tracking-widest text-ink">
@@ -291,6 +293,11 @@ function GroupTable({ pool }) {
                       <p className="flex items-center gap-2 truncate text-[11px] text-chalk/40">
                         {r.user_name}
                         <Presence lastSeenAt={r.last_seen_at} />
+                        {r.rating != null && (
+                          <span className="shrink-0 rounded bg-white/10 px-1.5 py-0.5 font-mono text-[10px] text-gold">
+                            {Math.round(Number(r.rating))}
+                          </span>
+                        )}
                         <span className="truncate">
                           ⚔{r.attack_formation} 🛡{r.defence_formation} ・ TP {r.team_power}
                         </span>

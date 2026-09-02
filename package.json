@@ -8,7 +8,8 @@
     "start": "next start",
     "seed": "node scripts/seed.mjs",
     "export": "node scripts/export.mjs",
-    "doctor": "node scripts/doctor.mjs"
+    "doctor": "node scripts/doctor.mjs",
+    "rating:rebuild": "node scripts/rating.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

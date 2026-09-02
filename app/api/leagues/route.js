@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { listLeagues } from '@/lib/league';
 import { authenticate, AuthError } from '@/lib/auth';
+import { CATEGORIES, DEFAULT_CATEGORY, canUseCategory, officialOrganizers } from '@/lib/rating';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,15 +31,29 @@ export async function POST(req) {
     // 主催者はユーザーIDで本人確認する
     const organizer = await authenticate(body.efootball_user_id);
 
+    // EFLランクの重要度を決めるカテゴリー。「公式」は運営者だけ
+    const category = CATEGORIES[body.category] ? body.category : DEFAULT_CATEGORY;
+    if (!canUseCategory(category, organizer.user_name)) {
+      return NextResponse.json(
+        {
+          error: officialOrganizers().length
+            ? '公式リーグを作れるのは運営者だけです'
+            : '公式リーグは現在作成できません（運営者の設定が必要です）',
+        },
+        { status: 403 }
+      );
+    }
+
     const [league] = await sql`
       INSERT INTO leagues
-        (name, organizer_user_id, players_per_pool, pool_count, recruit_start, recruit_end, description)
+        (name, organizer_user_id, players_per_pool, pool_count, recruit_start, recruit_end, description, category)
       VALUES (
         ${name}, ${organizer.user_id}, ${playersPerPool}, ${poolCount},
         ${body.recruit_start || null}, ${body.recruit_end || null},
-        ${String(body.description || '').trim() || null}
+        ${String(body.description || '').trim() || null},
+        ${category}
       )
-      RETURNING league_id, name, status
+      RETURNING league_id, name, status, category
     `;
     return NextResponse.json({ league, organizer_user_name: organizer.user_name });
   } catch (e) {

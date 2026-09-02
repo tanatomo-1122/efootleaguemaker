@@ -4,12 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import IdentityGate from './IdentityGate';
 import { useSession } from './SessionProvider';
+import { CATEGORIES } from '@/lib/rank';
 
 export default function CreateLeagueForm() {
   const router = useRouter();
   const { user } = useSession();
   const [form, setForm] = useState({
     name: '',
+    category: 'general',
     players_per_pool: 4,
     pool_count: 1,
     recruit_start: '',
@@ -57,6 +59,30 @@ export default function CreateLeagueForm() {
       <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
         <IdentityGate hint="ログインしている人が主催者になります。結果を確定できるのは主催者だけです。" />
       </div>
+
+      <Field label="リーグの格（EFLランクへの影響）">
+        <div className="grid gap-2 sm:grid-cols-3">
+          {Object.entries(CATEGORIES).map(([key, c]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, category: key }))}
+              className={`rounded-xl border p-3 text-left transition ${
+                form.category === key
+                  ? 'border-volt bg-volt/10'
+                  : 'border-white/15 hover:border-volt/50'
+              }`}
+            >
+              <span className="block text-sm font-bold text-chalk">{c.label}</span>
+              <span className="mt-1 block font-mono text-[11px] text-volt">I = {c.importance}</span>
+            </button>
+          ))}
+        </div>
+        <span className="mt-2 block text-xs text-white/35">
+          格が高いほど、1試合でEFLランクが大きく動きます。
+          <span className="text-white/25">公式リーグは運営者のみ作成できます。</span>
+        </span>
+      </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="1リーグ(プール)の人数">
