@@ -89,23 +89,6 @@ export default async function RankPage() {
           </>
         )}
 
-        {/* ---------- 未計算のユーザー ---------- */}
-        {unrated.length > 0 && (
-          <section className="mt-10">
-            <p className="wc-head mb-3">まだ1試合も消化していない参加者</p>
-            <div className="flex flex-wrap gap-2">
-              {unrated.map((u) => (
-                <span
-                  key={u.user_id}
-                  className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/40"
-                >
-                  {u.user_name} ・ {INITIAL_RATING}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* ---------- 仕組みの説明 ---------- */}
         <section className="card mt-12 p-8">
           <p className="label mb-4">EFLランクの決まり方</p>
