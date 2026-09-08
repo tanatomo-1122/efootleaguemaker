@@ -81,7 +81,7 @@ export default function CancelLeagueButton({ leagueId, organizerUserName, cancel
 
       {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
-      <div className="mt-5 flex gap-3">
+      <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:gap-3">
         <button
           type="button"
           onClick={run}
@@ -92,7 +92,7 @@ export default function CancelLeagueButton({ leagueId, organizerUserName, cancel
         >
           {busy ? '処理中…' : `リーグを${actionLabel}する`}
         </button>
-        <button type="button" onClick={() => setOpen(false)} className="btn-ghost !px-5">
+        <button type="button" onClick={() => setOpen(false)} className="btn-ghost w-full !px-5 sm:w-auto">
           やめる
         </button>
       </div>

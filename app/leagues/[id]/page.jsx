@@ -38,23 +38,23 @@ export default async function LeaguePage({ params }) {
 
   return (
     <div className="pitch-stripes bg-gradient-to-b from-pitchdark via-ink to-ink">
-      <div className="mx-auto max-w-6xl px-5 py-14">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-5 sm:py-14">
         {/* ヘッダー */}
         <div className="mb-10 text-center">
           <p className="wc-head">Group Stage</p>
-          <h1 className="trophy-glow mt-3 font-display text-5xl uppercase italic text-gold sm:text-6xl">
+          <h1 className="trophy-glow mt-3 font-display text-3xl uppercase italic text-gold sm:text-6xl">
             {league.name}
           </h1>
           {league.cancelled && <CancelledBanner league={league} />}
 
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-xs">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs sm:gap-3">
             <Badge>{league.cancelled ? '中止' : finished ? '確定済み' : '開催中'}</Badge>
             <Badge>{league.pool_count} プール × {league.players_per_pool} 人</Badge>
             {league.organizer_user_name && <Badge>主催 {league.organizer_user_name}</Badge>}
             <Badge>{CATEGORIES[league.category]?.label ?? '一般リーグ'}（I = {CATEGORIES[league.category]?.importance ?? 10}）</Badge>
             <Badge>承認済み {done} / {matches.length} 試合</Badge>
             {pending > 0 && (
-              <span className="rounded-full bg-amber-400 px-4 py-1.5 text-[11px] font-black tracking-widest text-ink">
+              <span className="rounded-full bg-amber-400 px-3 py-1 text-[10px] font-black tracking-widest text-ink sm:px-4 sm:py-1.5 sm:text-[11px]">
                 承認待ち {pending}
               </span>
             )}
@@ -78,7 +78,7 @@ export default async function LeaguePage({ params }) {
         <Bracket bracket={bracket} />
 
         {/* 対戦カード */}
-        <h2 className="mt-16 text-center font-display text-3xl uppercase italic text-chalk">
+        <h2 className="mt-14 text-center font-display text-2xl uppercase italic text-chalk sm:mt-16 sm:text-3xl">
           Fixtures & Results
         </h2>
         <p className="mt-2 text-center text-xs text-white/40">
@@ -99,8 +99,8 @@ export default async function LeaguePage({ params }) {
         {/* 確定 */}
         <div className="mt-16 text-center">
           {finished ? (
-            <div className="wc-panel mx-auto max-w-lg p-10">
-              <p className="trophy-glow font-display text-4xl uppercase italic text-gold">Final</p>
+            <div className="wc-panel mx-auto max-w-lg p-7 sm:p-10">
+              <p className="trophy-glow font-display text-3xl uppercase italic text-gold sm:text-4xl">Final</p>
               <p className="mt-4 text-sm text-chalk/70">
                 全試合の結果が確定しました。お疲れさまでした。
               </p>
@@ -149,9 +149,9 @@ function Preparing({ league, entries, capacity }) {
   const cancelled = league.cancelled;
 
   return (
-    <div className="mx-auto max-w-3xl px-5 py-20 text-center">
+    <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-5 sm:py-20">
       <p className="label">{cancelled ? 'Cancelled' : 'Preparing'}</p>
-      <h1 className={`headline mt-4 text-5xl ${cancelled ? 'text-white/40' : 'text-chalk'}`}>
+      <h1 className={`headline mt-4 text-4xl sm:text-5xl ${cancelled ? 'text-white/40' : 'text-chalk'}`}>
         {league.name}
       </h1>
 
@@ -163,7 +163,7 @@ function Preparing({ league, entries, capacity }) {
         </p>
       )}
 
-      <div className={`headline mt-12 text-8xl ${cancelled ? 'text-white/20' : 'text-volt'}`}>
+      <div className={`headline mt-10 text-6xl sm:mt-12 sm:text-8xl ${cancelled ? 'text-white/20' : 'text-volt'}`}>
         {entries.length}
         <span className="text-4xl text-white/20">/{capacity}</span>
       </div>
@@ -206,13 +206,13 @@ function Preparing({ league, entries, capacity }) {
       {entries.length > 0 && (
         <ul className="mx-auto mt-14 grid max-w-xl gap-2 text-left">
           {entries.map((e, i) => (
-            <li key={e.entry_id} className="card flex items-center gap-4 px-5 py-3">
+            <li key={e.entry_id} className="card flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-5">
               <span className="font-mono text-xs text-white/30">{String(i + 1).padStart(2, '0')}</span>
               <Avatar src={e.user_photo} name={e.user_name} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-chalk">{e.team_name}</p>
-                <p className="flex items-center gap-2 truncate text-xs text-white/40">
-                  {e.user_name}
+                <p className="flex min-w-0 flex-wrap items-center gap-x-2 text-xs text-white/40">
+                  <span className="truncate">{e.user_name}</span>
                   <Presence lastSeenAt={e.last_seen_at} />
                   <span className="truncate">
                     ⚔{e.attack_formation} 🛡{e.defence_formation} ・ {e.team_style}
@@ -247,7 +247,7 @@ function CancelledBanner({ league }) {
 function GroupTable({ pool }) {
   return (
     <section className="wc-panel overflow-hidden">
-      <header className="flex items-center justify-between border-b border-gold/20 px-5 py-3">
+      <header className="flex items-center justify-between border-b border-gold/20 px-4 py-3 sm:px-5">
         <h3 className="font-display text-xl uppercase italic text-gold">Group {pool.label}</h3>
         <span className="wc-head">Standings</span>
       </header>
@@ -256,16 +256,16 @@ function GroupTable({ pool }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 text-[10px] uppercase tracking-wider text-chalk/40">
-              <th className="px-3 py-2 text-left font-medium">#</th>
+              <th className="px-2 py-2 text-left font-medium sm:px-3">#</th>
               <th className="px-2 py-2 text-left font-medium">Team</th>
               <th className="px-2 py-2 text-center font-medium">試</th>
               <th className="px-2 py-2 text-center font-medium">勝</th>
               <th className="px-2 py-2 text-center font-medium">分</th>
               <th className="px-2 py-2 text-center font-medium">敗</th>
-              <th className="px-2 py-2 text-center font-medium">得</th>
-              <th className="px-2 py-2 text-center font-medium">失</th>
+              <th className="hidden px-2 py-2 text-center font-medium sm:table-cell">得</th>
+              <th className="hidden px-2 py-2 text-center font-medium sm:table-cell">失</th>
               <th className="px-2 py-2 text-center font-medium">差</th>
-              <th className="px-3 py-2 text-center font-bold text-gold">点</th>
+              <th className="px-2 py-2 text-center font-bold text-gold sm:px-3">点</th>
             </tr>
           </thead>
           <tbody>
@@ -276,7 +276,7 @@ function GroupTable({ pool }) {
                   r.rank <= 2 ? 'bg-gold/[0.06]' : ''
                 }`}
               >
-                <td className="px-3 py-3">
+                <td className="px-2 py-3 sm:px-3">
                   <span
                     className={`inline-flex h-6 w-6 items-center justify-center rounded font-display text-xs ${
                       r.rank <= 2 ? 'bg-gold text-pitchdark' : 'bg-white/10 text-white/50'
@@ -285,20 +285,21 @@ function GroupTable({ pool }) {
                     {r.rank}
                   </span>
                 </td>
-                <td className="px-2 py-3">
-                  <div className="flex items-center gap-3">
+                <td className="w-full max-w-0 px-1.5 py-3 sm:px-2">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <Avatar src={r.user_photo} name={r.user_name} size="h-8 w-8" />
                     <div className="min-w-0">
                       <p className="truncate font-bold text-chalk">{r.team_name}</p>
-                      <p className="flex items-center gap-2 truncate text-[11px] text-chalk/40">
-                        {r.user_name}
+                      <p className="flex min-w-0 items-center gap-1.5 text-[11px] text-chalk/40 sm:gap-2">
+                        <span className="truncate">{r.user_name}</span>
                         <Presence lastSeenAt={r.last_seen_at} />
                         {r.rating != null && (
                           <span className="shrink-0 rounded bg-white/10 px-1.5 py-0.5 font-mono text-[10px] text-gold">
                             {Math.round(Number(r.rating))}
                           </span>
                         )}
-                        <span className="truncate">
+                        {/* スマホでは列を優先。フォーメーションはPCのみ */}
+                        <span className="hidden truncate sm:inline">
                           ⚔{r.attack_formation} 🛡{r.defence_formation} ・ TP {r.team_power}
                         </span>
                       </p>
@@ -309,10 +310,10 @@ function GroupTable({ pool }) {
                 <Num v={r.win} />
                 <Num v={r.draw} />
                 <Num v={r.loss} />
-                <Num v={r.goals_for} />
-                <Num v={r.goals_against} />
+                <Num v={r.goals_for} hideOnMobile />
+                <Num v={r.goals_against} hideOnMobile />
                 <Num v={r.goal_diff > 0 ? `+${r.goal_diff}` : r.goal_diff} />
-                <td className="px-3 py-3 text-center font-display text-lg text-gold">{r.points}</td>
+                <td className="px-2 py-3 text-center font-display text-lg text-gold sm:px-3">{r.points}</td>
               </tr>
             ))}
           </tbody>
@@ -322,8 +323,16 @@ function GroupTable({ pool }) {
   );
 }
 
-function Num({ v }) {
-  return <td className="px-2 py-3 text-center font-mono text-chalk/70">{v}</td>;
+function Num({ v, hideOnMobile }) {
+  return (
+    <td
+      className={`px-1.5 py-3 text-center font-mono text-chalk/70 sm:px-2 ${
+        hideOnMobile ? 'hidden sm:table-cell' : ''
+      }`}
+    >
+      {v}
+    </td>
+  );
 }
 
 /* ---------------- 対戦カード ---------------- */
@@ -361,7 +370,7 @@ function MatchRow({ m, locked }) {
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-xl border bg-black/40 px-4 py-3 ${
+      className={`flex flex-wrap items-center gap-2 rounded-xl border bg-black/40 px-3 py-3 sm:flex-nowrap sm:gap-3 sm:px-4 ${
         pending ? 'border-amber-400/40' : 'border-white/10'
       }`}
     >
@@ -396,7 +405,7 @@ function MatchRow({ m, locked }) {
       {!locked && (
         <Link
           href={`/matches/${m.match_id}/report`}
-          className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition ${cta.cls}`}
+          className={`w-full shrink-0 rounded-full px-3 py-2.5 text-center text-[11px] font-bold uppercase tracking-widest transition sm:w-auto sm:py-1 sm:text-[10px] ${cta.cls}`}
         >
           {cta.text}
         </Link>
@@ -409,7 +418,7 @@ function MatchRow({ m, locked }) {
 
 function Badge({ children }) {
   return (
-    <span className="rounded-full border border-gold/30 px-4 py-1.5 text-[11px] font-bold tracking-widest text-chalk/80">
+    <span className="rounded-full border border-gold/30 px-3 py-1 text-[10px] font-bold tracking-widest text-chalk/80 sm:px-4 sm:py-1.5 sm:text-[11px]">
       {children}
     </span>
   );

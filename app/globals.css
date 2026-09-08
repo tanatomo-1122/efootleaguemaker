@@ -10,6 +10,27 @@ body {
   background: #050505;
   color: #f5f5f0;
   -webkit-font-smoothing: antialiased;
+  /* スマホで横に少しはみ出しても、ページ全体が横スクロールしないようにする
+     （clip なので sticky ヘッダーは壊れない） */
+  overflow-x: clip;
+}
+
+@layer base {
+  html {
+    /* 横向きにしたときに文字だけ勝手に大きくならないように */
+    -webkit-text-size-adjust: 100%;
+  }
+  /* タップしたときの青い箱を消す */
+  a,
+  button,
+  summary,
+  [role='button'] {
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* 長い名前やIDで横に伸びないように */
+  h1, h2, h3, p, li {
+    overflow-wrap: break-word;
+  }
 }
 
 @layer components {
@@ -21,19 +42,21 @@ body {
     @apply text-[11px] font-bold uppercase tracking-[0.2em] text-white/40;
   }
   .field {
+    /* text-base(16px) は iOS で入力時に画面が拡大しないための最低ライン */
     @apply w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-base
            text-chalk outline-none transition
            placeholder:text-white/25 focus:border-volt focus:bg-white/[0.07];
   }
   .btn-volt {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-volt px-8 py-4
-           font-display uppercase italic tracking-wide text-ink transition
-           hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:hover:brightness-100;
+    @apply inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full bg-volt
+           px-6 py-3.5 font-display uppercase italic tracking-wide text-ink transition
+           hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:hover:brightness-100
+           sm:px-8 sm:py-4;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/25
-           px-6 py-3 text-sm font-bold uppercase tracking-widest text-chalk transition
-           hover:border-volt hover:text-volt;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/25
+           px-5 py-3 text-xs font-bold uppercase tracking-widest text-chalk transition
+           hover:border-volt hover:text-volt sm:px-6 sm:text-sm;
   }
   .card {
     @apply rounded-2xl border border-white/10 bg-carbon shadow-card;
@@ -45,6 +68,34 @@ body {
   }
   .wc-head {
     @apply text-[10px] font-bold uppercase tracking-[0.18em] text-gold/70;
+  }
+}
+
+/* 横スクロールする表：スマホでも指で気持ちよく流せるように */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+/* スマホメニューの開き方 */
+.menu-panel {
+  animation: menu-in 0.16s ease-out;
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -80,4 +131,12 @@ body {
 
 .trophy-glow {
   text-shadow: 0 0 24px rgba(232, 197, 106, 0.45);
+}
+
+/* 動きを減らす設定の人には流れる文字を止める */
+@media (prefers-reduced-motion: reduce) {
+  .marquee,
+  .menu-panel {
+    animation: none;
+  }
 }

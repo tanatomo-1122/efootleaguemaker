@@ -43,7 +43,7 @@ export default function ApprovePanel({
 
   if (done) {
     return (
-      <div className="card mt-10 p-10 text-center">
+      <div className="card mt-10 p-8 text-center sm:p-10">
         <p className={`headline text-3xl ${done === 'approved' ? 'text-volt' : 'text-amber-300'}`}>
           {done === 'approved' ? '承認しました' : '差し戻しました'}
         </p>
@@ -72,13 +72,13 @@ export default function ApprovePanel({
       </div>
 
       {/* スコア */}
-      <section className="card p-8">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-center">
+      <section className="card p-5 sm:p-8">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-center sm:gap-4">
           <div className="min-w-0">
             <p className="label">HOME</p>
             <p className="mt-1 truncate text-sm text-chalk">{homeName}</p>
           </div>
-          <p className="headline text-5xl text-volt">
+          <p className="headline text-4xl text-volt sm:text-5xl">
             {hs} <span className="text-white/25">-</span> {as}
           </p>
           <div className="min-w-0">
@@ -89,9 +89,9 @@ export default function ApprovePanel({
 
         <div className="mt-8 space-y-1.5">
           {STAT_KEYS.filter((s) => s.key !== 'score').map(({ key, label }) => (
-            <div key={key} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-sm">
+            <div key={key} className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-sm sm:gap-3">
               <span className="text-right font-mono text-chalk/80">{fmt(stats[`home_${key}`])}</span>
-              <span className="w-28 text-center text-[11px] text-white/40">{label}</span>
+              <span className="w-20 shrink-0 text-center text-[10px] leading-tight text-white/40 sm:w-28 sm:text-[11px]">{label}</span>
               <span className="text-left font-mono text-chalk/80">{fmt(stats[`away_${key}`])}</span>
             </div>
           ))}
@@ -107,7 +107,7 @@ export default function ApprovePanel({
       </section>
 
       {/* 承認 */}
-      <section className="card p-6">
+      <section className="card p-5 sm:p-6">
         <IdentityGate
           expectedUserName={awayUserName}
           hint={`承認できるのはアウェイ側の ${awayUserName} さんです。`}

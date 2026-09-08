@@ -7,9 +7,9 @@ export default function Bracket({ bracket }) {
 
   return (
     <section className="wc-panel mt-16 overflow-hidden">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-gold/20 px-6 py-4">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-gold/20 px-5 py-4 sm:px-6">
         <div>
-          <h2 className="font-display text-2xl uppercase italic text-gold">Knockout Stage</h2>
+          <h2 className="font-display text-xl uppercase italic text-gold sm:text-2xl">Knockout Stage</h2>
           <p className="mt-1 text-xs text-chalk/50">
             各グループの上位2名が進出。グループリーグの結果がそのままこの表につながります。
           </p>
@@ -19,7 +19,7 @@ export default function Bracket({ bracket }) {
         </span>
       </header>
 
-      <div className="overflow-x-auto p-6">
+      <div className="overflow-x-auto p-4 sm:p-6">
         <div className="flex min-w-max gap-6">
           {bracket.rounds.map((round, ri) => (
             <div key={ri} className="flex flex-col justify-around gap-4">
@@ -46,7 +46,7 @@ export default function Bracket({ bracket }) {
 
 function BracketMatch({ pair, first }) {
   return (
-    <div className="w-52 overflow-hidden rounded-xl border border-white/10 bg-black/40">
+    <div className="w-44 overflow-hidden rounded-xl border border-white/10 bg-black/40 sm:w-52">
       <Slot seed={first ? pair?.[0] : null} />
       <div className="h-px bg-white/10" />
       <Slot seed={first ? pair?.[1] : null} />

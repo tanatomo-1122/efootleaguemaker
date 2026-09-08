@@ -15,9 +15,9 @@ export default async function RankPage() {
 
   return (
     <div className="pitch-stripes bg-gradient-to-b from-pitchdark via-ink to-ink">
-      <div className="mx-auto max-w-5xl px-5 py-14">
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-5 sm:py-14">
         <p className="wc-head">World Ranking</p>
-        <h1 className="trophy-glow mt-3 font-display text-6xl uppercase italic text-gold sm:text-7xl">
+        <h1 className="trophy-glow mt-3 font-display text-5xl uppercase italic text-gold sm:text-7xl">
           EFL Rank
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/55">
@@ -43,40 +43,51 @@ export default async function RankPage() {
             {rest.length > 0 && (
               <div className="wc-panel mt-6 overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[640px] text-sm">
+                  <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-white/10 text-[10px] uppercase tracking-wider text-chalk/40">
-                        <th className="px-4 py-3 text-left font-medium">#</th>
+                        <th className="px-2 py-3 text-left font-medium sm:px-4">#</th>
                         <th className="px-2 py-3 text-left font-medium">Player</th>
-                        <th className="px-2 py-3 text-left font-medium">Tier</th>
-                        <th className="px-2 py-3 text-right font-medium">試合</th>
-                        <th className="px-2 py-3 text-right font-medium">直近</th>
-                        <th className="px-4 py-3 text-right font-bold text-gold">Rating</th>
+                        <th className="hidden px-2 py-3 text-left font-medium sm:table-cell">Tier</th>
+                        <th className="hidden px-2 py-3 text-right font-medium sm:table-cell">試合</th>
+                        <th className="hidden px-2 py-3 text-right font-medium sm:table-cell">直近</th>
+                        <th className="px-2 py-3 text-right font-bold text-gold sm:px-4">Rating</th>
                       </tr>
                     </thead>
                     <tbody>
                       {rest.map((r) => (
                         <tr key={r.user_id} className="border-b border-white/5 hover:bg-white/[0.03]">
-                          <td className="px-4 py-3 font-display text-white/40">{r.rank}</td>
-                          <td className="px-2 py-3">
-                            <div className="flex items-center gap-3">
+                          <td className="px-2 py-3 font-display text-white/40 sm:px-4">{r.rank}</td>
+                          <td className="w-full max-w-0 px-2 py-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
                               <Avatar src={r.photo_path} name={r.user_name} />
                               <div className="min-w-0">
                                 <p className="truncate font-bold text-chalk">{r.user_name}</p>
-                                <Presence lastSeenAt={r.last_seen_at} />
+                                <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                                  <span className="sm:hidden">
+                                    <TierBadge tier={r.tier} />
+                                  </span>
+                                  <Presence lastSeenAt={r.last_seen_at} />
+                                  <span className="text-[10px] text-white/30 sm:hidden">
+                                    {r.rating_matches}試合
+                                  </span>
+                                  <span className="sm:hidden">
+                                    <Delta value={r.last_delta} />
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-2 py-3">
+                          <td className="hidden px-2 py-3 sm:table-cell">
                             <TierBadge tier={r.tier} />
                           </td>
-                          <td className="px-2 py-3 text-right font-mono text-white/50">
+                          <td className="hidden px-2 py-3 text-right font-mono text-white/50 sm:table-cell">
                             {r.rating_matches}
                           </td>
-                          <td className="px-2 py-3 text-right">
+                          <td className="hidden px-2 py-3 text-right sm:table-cell">
                             <Delta value={r.last_delta} />
                           </td>
-                          <td className="px-4 py-3 text-right font-display text-xl text-gold">
+                          <td className="px-2 py-3 text-right font-display text-xl text-gold sm:px-4">
                             {Math.round(r.rating)}
                           </td>
                         </tr>
@@ -90,7 +101,7 @@ export default async function RankPage() {
         )}
 
         {/* ---------- 仕組みの説明 ---------- */}
-        <section className="card mt-12 p-8">
+        <section className="card mt-12 p-6 sm:p-8">
           <p className="label mb-4">EFLランクの決まり方</p>
           <p className="font-mono text-sm text-volt">P = P_before + I × (W − We)</p>
           <p className="mt-2 font-mono text-xs text-white/40">
@@ -152,7 +163,7 @@ function Podium({ r }) {
   const medal = ['🥇', '🥈', '🥉'][r.rank - 1] ?? '';
   return (
     <article
-      className={`wc-panel relative overflow-hidden p-6 text-center ${
+      className={`wc-panel relative overflow-hidden p-5 text-center sm:p-6 ${
         r.rank === 1 ? 'sm:-mt-3 sm:pb-9' : ''
       }`}
     >

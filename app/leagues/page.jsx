@@ -29,13 +29,13 @@ export default async function LeaguesPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-5 py-14">
-        <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-5 sm:py-14">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-4 sm:mb-12">
           <div>
             <p className="label mb-3">Open Fixtures</p>
-            <h1 className="headline text-6xl text-chalk sm:text-7xl">試合募集</h1>
+            <h1 className="headline text-5xl text-chalk sm:text-7xl">試合募集</h1>
           </div>
-          <Link href="/leagues/new" className="btn-ghost">＋ リーグを主催する</Link>
+          <Link href="/leagues/new" className="btn-ghost w-full sm:w-auto">＋ リーグを主催する</Link>
         </div>
 
         <p className="-mt-8 mb-8 text-xs text-white/30">
@@ -66,7 +66,7 @@ async function LeagueCard({ league }) {
   const isOpen = league.status === 'recruiting';
 
   return (
-    <article className="card slash-bg group relative overflow-hidden p-7 transition hover:border-volt/50">
+    <article className="card slash-bg group relative overflow-hidden p-5 transition hover:border-volt/50 sm:p-7">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -79,7 +79,7 @@ async function LeagueCard({ league }) {
               </span>
             )}
           </div>
-          <h2 className="headline mt-4 truncate text-3xl text-chalk">{league.name}</h2>
+          <h2 className="headline mt-3 truncate text-2xl text-chalk sm:mt-4 sm:text-3xl">{league.name}</h2>
           {league.organizer_user_name && (
             <p className="mt-1 truncate text-xs text-white/35">
               主催: {league.organizer_user_name}
@@ -90,7 +90,7 @@ async function LeagueCard({ league }) {
           )}
         </div>
         <div className="shrink-0 text-right">
-          <div className="headline text-5xl text-volt">
+          <div className="headline text-4xl text-volt sm:text-5xl">
             {filled}
             <span className="text-2xl text-white/25">/{capacity}</span>
           </div>
@@ -151,7 +151,7 @@ async function LeagueCard({ league }) {
         </div>
       )}
 
-      <div className="mt-7 flex gap-3">
+      <div className="mt-6 flex flex-col gap-2 sm:mt-7 sm:flex-row sm:gap-3">
         {isOpen ? (
           <Link href={`/leagues/${league.league_id}/join`} className="btn-volt flex-1 !py-3 text-sm">
             エントリーする
@@ -161,7 +161,7 @@ async function LeagueCard({ league }) {
             リーグ表を見る
           </Link>
         )}
-        <Link href={`/leagues/${league.league_id}`} className="btn-ghost !px-5 !py-3 text-xs">
+        <Link href={`/leagues/${league.league_id}`} className="btn-ghost w-full !px-5 !py-3 text-xs sm:w-auto">
           詳細
         </Link>
       </div>
@@ -185,7 +185,7 @@ function Meta({ label, value }) {
 
 function Empty() {
   return (
-    <div className="card p-16 text-center">
+    <div className="card p-10 text-center sm:p-16">
       <p className="headline text-3xl text-white/25">まだ募集がありません</p>
       <p className="mt-4 text-sm text-white/40">最初のリーグを立ち上げてみましょう。</p>
       <Link href="/leagues/new" className="btn-volt mt-8">リーグを作成する</Link>

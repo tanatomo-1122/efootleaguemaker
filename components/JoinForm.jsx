@@ -69,8 +69,8 @@ export default function JoinForm({ leagueId, remaining }) {
 
   if (drawn) {
     return (
-      <div className="wc-panel mt-8 p-12 text-center">
-        <p className="trophy-glow font-display text-5xl uppercase italic text-gold">Draw!</p>
+      <div className="wc-panel mt-8 p-8 text-center sm:p-12">
+        <p className="trophy-glow font-display text-4xl uppercase italic text-gold sm:text-5xl">Draw!</p>
         <p className="mt-4 text-sm text-chalk/80">
           規定人数に達しました。組み合わせ抽選が完了しています。
         </p>
@@ -163,7 +163,7 @@ export default function JoinForm({ leagueId, remaining }) {
 
 function Section({ n, title, children }) {
   return (
-    <fieldset className="rounded-2xl border border-white/10 bg-black/40 p-6">
+    <fieldset className="rounded-2xl border border-white/10 bg-black/40 p-5 sm:p-6">
       <legend className="flex items-center gap-3 px-2">
         <span className="font-display text-lg italic text-gold">{n}</span>
         <span className="text-sm font-bold text-chalk">{title}</span>

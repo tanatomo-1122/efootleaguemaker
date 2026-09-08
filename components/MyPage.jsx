@@ -51,7 +51,7 @@ export default function MyPage() {
   // ログイン済みなら、読み込みが終わるまでログインフォームを見せない
   if (!data && sessionUser) {
     return (
-      <div className="card mt-10 p-10 text-center">
+      <div className="card mt-10 p-8 text-center sm:p-10">
         <p className="text-sm text-white/45">
           {error ?? `${sessionUser.user_name} さんの状況を読み込んでいます…`}
         </p>
@@ -66,7 +66,7 @@ export default function MyPage() {
 
   if (!data) {
     return (
-      <div className="card mt-10 p-6">
+      <div className="card mt-10 p-5 sm:p-6">
         <UserIdInput
           value={userId}
           onChange={setUserId}
@@ -105,7 +105,7 @@ export default function MyPage() {
           )}
           <div>
             <p className="label">ようこそ</p>
-            <p className="headline text-3xl text-chalk">{user.user_name}</p>
+            <p className="headline text-2xl text-chalk sm:text-3xl">{user.user_name}</p>
           </div>
         </div>
         <button onClick={() => load()} disabled={busy} className="btn-ghost !px-5 !py-2 text-xs">
@@ -117,7 +117,7 @@ export default function MyPage() {
 
       {/* ---------- 通知 ---------- */}
       <section>
-        <h2 className="headline text-2xl text-chalk">
+        <h2 className="headline text-xl text-chalk sm:text-2xl">
           やること
           {urgent.length > 0 && (
             <span className="ml-3 rounded-full bg-amber-400 px-3 py-1 align-middle text-[11px] font-black tracking-widest text-ink">
@@ -135,7 +135,7 @@ export default function MyPage() {
             {todos.map((t, i) => (
               <li
                 key={i}
-                className={`card flex flex-wrap items-center gap-4 p-5 ${
+                className={`card flex flex-wrap items-center gap-3 p-4 sm:gap-4 sm:p-5 ${
                   t.urgent ? '!border-amber-400/40 bg-amber-400/[0.04]' : ''
                 }`}
               >
@@ -160,7 +160,7 @@ export default function MyPage() {
                 </div>
                 <Link
                   href={t.match_id ? `/matches/${t.match_id}/report` : `/leagues/${t.league_id}`}
-                  className={`shrink-0 rounded-full px-4 py-2 text-[11px] font-bold tracking-widest transition ${
+                  className={`w-full shrink-0 rounded-full px-4 py-2.5 text-center text-[11px] font-bold tracking-widest transition sm:w-auto sm:py-2 ${
                     t.urgent ? 'bg-amber-400 text-ink' : 'border border-white/15 text-white/60 hover:text-volt'
                   }`}
                 >
@@ -174,7 +174,7 @@ export default function MyPage() {
 
       {/* ---------- 参加リーグ ---------- */}
       <section>
-        <h2 className="headline text-2xl text-chalk">申し込んだリーグ</h2>
+        <h2 className="headline text-xl text-chalk sm:text-2xl">申し込んだリーグ</h2>
         {joined.length === 0 ? (
           <p className="card mt-4 p-8 text-center text-sm text-white/40">
             まだ参加しているリーグはありません。{' '}
@@ -183,7 +183,7 @@ export default function MyPage() {
         ) : (
           <ul className="mt-4 space-y-2">
             {joined.map((l) => (
-              <li key={l.league_id} className="card flex flex-wrap items-center gap-4 p-5">
+              <li key={l.league_id} className="card flex flex-wrap items-center gap-3 p-4 sm:gap-4 sm:p-5">
                 <StatusChip league={l} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-chalk">{l.name}</p>
@@ -199,7 +199,7 @@ export default function MyPage() {
                     <p className="mt-1 truncate text-xs text-amber-300">中止: {l.cancel_reason}</p>
                   )}
                 </div>
-                <Link href={`/leagues/${l.league_id}`} className="btn-ghost !px-4 !py-2 text-[11px]">
+                <Link href={`/leagues/${l.league_id}`} className="btn-ghost w-full !px-4 !py-2 text-[11px] sm:w-auto">
                   開く
                 </Link>
               </li>
@@ -211,7 +211,7 @@ export default function MyPage() {
       {/* ---------- 主催リーグ ---------- */}
       <section>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="headline text-2xl text-chalk">主催したリーグ</h2>
+          <h2 className="headline text-xl text-chalk sm:text-2xl">主催したリーグ</h2>
           <Link href="/leagues/new" className="btn-ghost !px-4 !py-2 text-[11px]">＋ 新しく主催する</Link>
         </div>
         {organized.length === 0 ? (
@@ -221,7 +221,7 @@ export default function MyPage() {
         ) : (
           <ul className="mt-4 space-y-2">
             {organized.map((l) => (
-              <li key={l.league_id} className="card flex flex-wrap items-center gap-4 p-5">
+              <li key={l.league_id} className="card flex flex-wrap items-center gap-3 p-4 sm:gap-4 sm:p-5">
                 <StatusChip league={l} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-chalk">{l.name}</p>
@@ -231,7 +231,7 @@ export default function MyPage() {
                       : `${l.entry_count}人 ・ 承認済み ${l.done_count}/${l.match_count} 試合`}
                   </p>
                 </div>
-                <Link href={`/leagues/${l.league_id}`} className="btn-ghost !px-4 !py-2 text-[11px]">
+                <Link href={`/leagues/${l.league_id}`} className="btn-ghost w-full !px-4 !py-2 text-[11px] sm:w-auto">
                   管理する
                 </Link>
               </li>

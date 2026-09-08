@@ -56,7 +56,7 @@ export default function CreateLeagueForm() {
         <input className="field" value={form.name} onChange={set('name')} placeholder="例: 第1回 efootleague 杯" required />
       </Field>
 
-      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
         <IdentityGate hint="ログインしている人が主催者になります。結果を確定できるのは主催者だけです。" />
       </div>
 
@@ -103,9 +103,9 @@ export default function CreateLeagueForm() {
         </Field>
       </div>
 
-      <div className="rounded-xl border border-volt/30 bg-volt/[0.06] p-5">
+      <div className="rounded-xl border border-volt/30 bg-volt/[0.06] p-4 sm:p-5">
         <p className="label mb-3 !text-volt/70">この設定でできるリーグ</p>
-        <div className="flex flex-wrap gap-x-10 gap-y-3">
+        <div className="grid grid-cols-3 gap-3 sm:flex sm:flex-wrap sm:gap-x-10 sm:gap-y-3">
           <Summary n={capacity} unit="人" label="定員(自動締切)" />
           <Summary n={matches} unit="試合" label="総試合数" />
           <Summary n={perPool - 1} unit="節" label="各プールの節数" />
@@ -146,7 +146,7 @@ function Field({ label, children }) {
 function Summary({ n, unit, label }) {
   return (
     <div>
-      <span className="font-display text-3xl text-volt">{n}</span>
+      <span className="font-display text-2xl text-volt sm:text-3xl">{n}</span>
       <span className="ml-1 text-sm text-white/50">{unit}</span>
       <div className="label mt-1">{label}</div>
     </div>

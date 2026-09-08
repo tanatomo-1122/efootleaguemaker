@@ -124,7 +124,7 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
   }, [messages.length]);
 
   return (
-    <section className="card mt-6 p-6">
+    <section className="card mt-6 p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="label">トーク</p>
         {unlocked && !closed && (
@@ -173,7 +173,7 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
       ) : (
         <>
           {/* 履歴 */}
-          <div className="mt-5 max-h-80 space-y-2 overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-4">
+          <div className="mt-5 max-h-72 space-y-2 overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-3 sm:max-h-80 sm:p-4">
             {messages.length === 0 ? (
               <p className="py-8 text-center text-xs text-white/30">
                 まだメッセージはありません。下から送ってみてください。
@@ -235,7 +235,7 @@ export default function ChatPanel({ matchId, homeUserName, awayUserName }) {
               type="button"
               onClick={() => send()}
               disabled={sending || !draft.trim()}
-              className="btn-volt !px-6 !py-3 text-sm"
+              className="btn-volt shrink-0 !px-5 !py-3 text-sm"
             >
               {sending ? '…' : '送信'}
             </button>

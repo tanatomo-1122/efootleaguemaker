@@ -19,14 +19,14 @@ export default async function DataPage() {
   const finished = await finishedLeagueChampions();
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-14">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-5 sm:py-14">
       <p className="label mb-3">Community Stats</p>
-      <h1 className="headline text-5xl text-chalk">みんなのデータ</h1>
+      <h1 className="headline text-4xl text-chalk sm:text-5xl">みんなのデータ</h1>
       <p className="mt-4 max-w-2xl text-sm text-white/50">
         これまでに行われた全試合から集計しています。承認済みの試合が増えるたびに自動で更新されます。
       </p>
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:grid-cols-4 sm:gap-4">
         <Kpi n={summary.matches} label="記録された試合" />
         <Kpi n={summary.goals} label="生まれたゴール" />
         <Kpi n={summary.players} label="参加プレイヤー" />
@@ -34,7 +34,7 @@ export default async function DataPage() {
       </div>
 
       {/* ---------- 終了した大会の記録 ---------- */}
-      <h2 className="headline mt-16 text-3xl text-chalk">
+      <h2 className="headline mt-12 text-2xl text-chalk sm:mt-16 sm:text-3xl">
         歴代の<span className="text-volt">大会結果</span>
       </h2>
       <p className="mt-2 text-xs text-white/40">
@@ -49,7 +49,7 @@ export default async function DataPage() {
         <div className="mt-6 space-y-4">
           {finished.map((l) => (
             <article key={l.league_id} className="wc-panel overflow-hidden">
-              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-gold/20 px-5 py-3">
+              <header className="flex flex-wrap items-center justify-between gap-2 border-b border-gold/20 px-4 py-3 sm:gap-3 sm:px-5">
                 <h3 className="font-display text-xl uppercase italic text-gold">{l.league_name}</h3>
                 <span className="wc-head">
                   {l.entry_count}人 ・ {l.pool_count}グループ ・ {formatDate(l.created_at)}
@@ -58,7 +58,7 @@ export default async function DataPage() {
 
               <ul className="divide-y divide-white/5">
                 {l.champions.map((c) => (
-                  <li key={c.pool_index} className="flex flex-wrap items-center gap-4 px-5 py-4">
+                  <li key={c.pool_index} className="flex flex-wrap items-center gap-3 px-4 py-4 sm:gap-4 sm:px-5">
                     <span className="trophy-glow text-2xl">🏆</span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-display text-lg text-chalk">{c.team_name}</p>
@@ -66,7 +66,7 @@ export default async function DataPage() {
                         {c.user_name} ・ ⚔{c.attack_formation} 🛡{c.defence_formation}
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="w-full text-left sm:w-auto sm:text-right">
                       <p className="font-mono text-sm text-gold">
                         勝点 {c.points} ・ 得失 {c.goal_diff > 0 ? `+${c.goal_diff}` : c.goal_diff}
                       </p>
@@ -83,7 +83,7 @@ export default async function DataPage() {
       )}
 
       {/* ---------- フォーメーション別勝率 ---------- */}
-      <h2 className="headline mt-16 text-3xl text-chalk">
+      <h2 className="headline mt-12 text-2xl text-chalk sm:mt-16 sm:text-3xl">
         フォーメーション別<span className="text-volt">勝率</span>
       </h2>
       <p className="mt-2 text-xs text-white/40">攻撃時フォーメーション別。試合数の多い順。</p>
@@ -91,7 +91,9 @@ export default async function DataPage() {
       {rates.length === 0 ? (
         <Empty />
       ) : (
-        <div className="card mt-6 overflow-x-auto">
+        <>
+        <ScrollHint />
+        <div className="card mt-3 overflow-x-auto sm:mt-6">
           <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-white/10 text-[10px] uppercase tracking-wider text-white/40">
@@ -124,10 +126,11 @@ export default async function DataPage() {
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       {/* ---------- 相性表 ---------- */}
-      <h2 className="headline mt-16 text-3xl text-chalk">
+      <h2 className="headline mt-12 text-2xl text-chalk sm:mt-16 sm:text-3xl">
         フォーメーション<span className="text-volt">相性表</span>
       </h2>
       <p className="mt-2 text-xs text-white/40">
@@ -138,7 +141,8 @@ export default async function DataPage() {
         <Empty />
       ) : (
         <>
-          <div className="card mt-6 overflow-x-auto">
+          <ScrollHint />
+          <div className="card mt-3 overflow-x-auto sm:mt-6">
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr>
@@ -183,6 +187,14 @@ export default async function DataPage() {
         ※ 個々の試合スタッツやスカッドの詳細データは公開していません。
       </p>
     </div>
+  );
+}
+
+function ScrollHint() {
+  return (
+    <p className="mt-4 text-[10px] tracking-widest text-white/25 sm:hidden">
+      → 横にスクロールできます
+    </p>
   );
 }
 
@@ -234,8 +246,8 @@ function Empty() {
 
 function Kpi({ n, label }) {
   return (
-    <div className="card p-6">
-      <div className="headline text-4xl text-volt">{n}</div>
+    <div className="card p-5 sm:p-6">
+      <div className="headline text-3xl text-volt sm:text-4xl">{n}</div>
       <div className="label mt-2">{label}</div>
     </div>
   );

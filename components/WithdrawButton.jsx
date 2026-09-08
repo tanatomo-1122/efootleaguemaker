@@ -56,11 +56,11 @@ export default function WithdrawButton({ leagueId }) {
   }
 
   return (
-    <div className="card mx-auto mt-8 max-w-md p-6 text-left">
+    <div className="card mx-auto mt-8 max-w-md p-5 text-left sm:p-6">
       <p className="label mb-4">参加取り消し</p>
       <IdentityGate hint="登録したスカッドも一緒に削除されます。" />
       {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
-      <div className="mt-5 flex gap-3">
+      <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:gap-3">
         <button
           type="button"
           onClick={withdraw}
@@ -69,7 +69,7 @@ export default function WithdrawButton({ leagueId }) {
         >
           {busy ? '処理中…' : '取り消す'}
         </button>
-        <button type="button" onClick={() => setOpen(false)} className="btn-ghost !px-5">
+        <button type="button" onClick={() => setOpen(false)} className="btn-ghost w-full !px-5 sm:w-auto">
           やめる
         </button>
       </div>

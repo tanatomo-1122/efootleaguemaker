@@ -17,8 +17,8 @@ export default async function JoinPage({ params }) {
 
   if (league.cancelled) {
     return (
-      <div className="mx-auto max-w-xl px-5 py-24 text-center">
-        <h1 className="headline text-4xl text-chalk">このリーグは中止されました</h1>
+      <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-5 sm:py-24">
+        <h1 className="headline text-3xl text-chalk sm:text-4xl">このリーグは中止されました</h1>
         {league.cancel_reason && (
           <p className="mt-4 text-sm text-white/50">理由: {league.cancel_reason}</p>
         )}
@@ -29,8 +29,8 @@ export default async function JoinPage({ params }) {
 
   if (league.status !== 'recruiting') {
     return (
-      <div className="mx-auto max-w-xl px-5 py-24 text-center">
-        <h1 className="headline text-4xl text-chalk">受付は終了しました</h1>
+      <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-5 sm:py-24">
+        <h1 className="headline text-3xl text-chalk sm:text-4xl">受付は終了しました</h1>
         <p className="mt-4 text-sm text-white/50">このリーグは既に組み合わせが確定しています。</p>
         <Link href={`/leagues/${leagueId}`} className="btn-volt mt-8">リーグ表を見る</Link>
       </div>
@@ -39,15 +39,15 @@ export default async function JoinPage({ params }) {
 
   return (
     <div className="pitch-stripes min-h-screen bg-gradient-to-b from-pitchdark via-ink to-ink">
-      <div className="mx-auto max-w-2xl px-5 py-16">
+      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-5 sm:py-16">
         {/* エントリーパス風ヘッダー */}
         <div className="wc-panel overflow-hidden">
-          <div className="flex items-center justify-between border-b border-gold/20 px-6 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gold/20 px-5 py-3 sm:px-6 sm:py-4">
             <span className="wc-head">Official Entry Sheet</span>
             <span className="wc-head">{league.name}</span>
           </div>
-          <div className="px-6 py-8 text-center">
-            <p className="trophy-glow font-display text-4xl uppercase italic text-gold">
+          <div className="px-5 py-7 text-center sm:px-6 sm:py-8">
+            <p className="trophy-glow font-display text-3xl uppercase italic text-gold sm:text-4xl">
               Squad Registration
             </p>
             <p className="mt-3 text-sm text-chalk/70">

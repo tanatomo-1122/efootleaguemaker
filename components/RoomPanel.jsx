@@ -78,7 +78,7 @@ export default function RoomPanel({
 
   return (
     <section
-      className={`card mt-10 p-6 ${hasRoom ? '!border-volt/40 bg-volt/[0.03]' : ''}`}
+      className={`card mt-10 p-4 sm:p-6 ${hasRoom ? '!border-volt/40 bg-volt/[0.03]' : ''}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="label">対戦部屋</p>
@@ -107,7 +107,7 @@ export default function RoomPanel({
           {revealed.has_room ? (
             <>
               <p className="label">部屋番号</p>
-              <p className="headline mt-2 select-all text-4xl tracking-widest text-volt">
+              <p className="headline mt-2 select-all text-3xl tracking-widest text-volt sm:text-4xl">
                 {revealed.room_code}
               </p>
               {revealed.room_note && (
@@ -131,7 +131,7 @@ export default function RoomPanel({
 
       {/* 操作 */}
       {mode === null && (
-        <div className="mt-5 flex flex-wrap gap-3">
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
           <button
             type="button"
             onClick={() => { setMode('reveal'); setRevealed(null); setError(null); }}
@@ -152,7 +152,7 @@ export default function RoomPanel({
       {mode === 'reveal' && (
         <div className="mt-5 space-y-4">
           <IdentityGate hint="この試合の対戦者だけが確認できます。" />
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
             <button
               type="button"
               onClick={reveal}
@@ -195,7 +195,7 @@ export default function RoomPanel({
               maxLength={100}
             />
           </label>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
             <button
               type="button"
               onClick={() => post('post')}

@@ -119,7 +119,7 @@ export default function OrganizerMatchPanel({
 
       {/* 不戦勝 */}
       {matchStatus !== 'reported' && (
-        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
           <p className="text-sm font-bold text-chalk">不戦勝として処理する</p>
           <p className="mt-2 text-xs text-white/45">
             片方が最後まで現れなかった場合に、3-0 で記録します。スクリーンショットは不要です。
@@ -154,12 +154,12 @@ export default function OrganizerMatchPanel({
       )}
 
       {/* スコアを指定して確定 */}
-      <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+      <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
         <p className="text-sm font-bold text-chalk">スコアを指定して確定する</p>
         <p className="mt-2 text-xs text-white/45">
           対戦は済んだのに登録されない場合に、聞き取ったスコアで確定します。
         </p>
-        <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-center">
+        <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-center sm:gap-3">
           <div>
             <p className="mb-1 truncate text-[11px] text-white/45">{homeName}</p>
             <input

@@ -90,7 +90,7 @@ export default function ReportForm({
 
   if (sent) {
     return (
-      <div className="card mt-10 p-10 text-center">
+      <div className="card mt-10 p-8 text-center sm:p-10">
         <p className="headline text-3xl text-volt">送信しました</p>
         <p className="mt-4 text-sm text-white/60">
           アウェイの <span className="text-chalk">{awayUserName}</span> さんが承認すると、
@@ -103,7 +103,7 @@ export default function ReportForm({
   return (
     <div className="mt-10 space-y-8">
       {/* ---------- 本人確認 ---------- */}
-      <section className="card p-6">
+      <section className="card p-5 sm:p-6">
         <p className="label mb-4">Step 1 / 本人確認</p>
         <IdentityGate
           expectedUserName={homeUserName}
@@ -112,7 +112,7 @@ export default function ReportForm({
       </section>
 
       {/* ---------- 画像アップロード ---------- */}
-      <section className="card p-6">
+      <section className="card p-5 sm:p-6">
         <p className="label mb-4">Step 2 / 試合結果の写真を送る</p>
         <PhotoInput onChange={setFile} hint="試合結果 or マッチスタッツ画面のスクショ" preset="result" />
         <button
@@ -168,15 +168,15 @@ export default function ReportForm({
 
       {/* ---------- 確認・送信 ---------- */}
       {phase === 'review' && (
-        <section className="card p-6">
-          <div className="mb-5 flex items-center justify-between gap-4">
+        <section className="card p-5 sm:p-6">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <p className="label">Step 3 / 内容を確認して送信</p>
             <button type="button" onClick={swap} className="btn-ghost !px-4 !py-2 !text-[10px]">
               ⇄ HOME / AWAY を入れ替える
             </button>
           </div>
 
-          <div className="mb-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-center">
+          <div className="mb-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-center sm:gap-3">
             <span className="truncate text-sm font-bold text-chalk">{homeName}</span>
             <span className="label">項目</span>
             <span className="truncate text-sm font-bold text-chalk">{awayName}</span>
@@ -184,7 +184,7 @@ export default function ReportForm({
 
           <div className="space-y-2">
             {STAT_KEYS.map(({ key, label }) => (
-              <div key={key} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+              <div key={key} className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-3">
                 <input
                   type="number"
                   step="any"
@@ -192,7 +192,7 @@ export default function ReportForm({
                   value={stats[`home_${key}`] ?? ''}
                   onChange={setStat(`home_${key}`)}
                 />
-                <span className="w-28 text-center text-[11px] text-white/45">{label}</span>
+                <span className="w-16 shrink-0 text-center text-[10px] leading-tight text-white/45 sm:w-28 sm:text-[11px]">{label}</span>
                 <input
                   type="number"
                   step="any"

@@ -31,7 +31,7 @@ export default async function ReportPage({ params }) {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-5 py-14">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-5 sm:py-14">
       <Link href={`/leagues/${match.league_id}`} className="text-xs text-white/40 hover:text-volt">
         ← {league.name}
       </Link>
@@ -41,7 +41,7 @@ export default async function ReportPage({ params }) {
         <StatusChip status={match.status} />
       </p>
 
-      <div className="mt-4 flex items-center justify-between gap-4">
+      <div className="mt-4 flex items-center justify-between gap-2 sm:gap-4">
         <Side
           name={match.home_team_name} user={match.home_user_name}
           lastSeenAt={match.home_last_seen_at}
@@ -103,7 +103,7 @@ export default async function ReportPage({ params }) {
         </>
       ) : match.status === 'reported' ? (
         <>
-          <div className="card mt-10 p-10 text-center">
+          <div className="card mt-10 p-8 text-center sm:p-10">
             <p className="label">承認済み</p>
             <p className="headline mt-3 text-5xl text-volt">
               {match.home_score} <span className="text-white/25">-</span> {match.away_score}
@@ -161,7 +161,7 @@ function formatTime(v) {
 
 function Collapsible({ summary, children }) {
   return (
-    <details className="mt-10 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+    <details className="mt-10 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
       <summary className="cursor-pointer text-xs font-bold uppercase tracking-widest text-white/40 hover:text-volt">
         {summary}
       </summary>
@@ -188,7 +188,7 @@ function Side({ name, user, side, align, lastSeenAt }) {
   return (
     <div className={`min-w-0 flex-1 ${align}`}>
       <p className="label">{side}</p>
-      <p className="mt-1 truncate font-display text-2xl text-chalk">{name}</p>
+      <p className="mt-1 truncate font-display text-lg text-chalk sm:text-2xl">{name}</p>
       <p className="truncate text-xs text-white/40">{user}</p>
       <div className={`mt-1 flex ${align === 'text-right' ? 'justify-end' : 'justify-start'}`}>
         <Presence lastSeenAt={lastSeenAt} />
